@@ -8,10 +8,10 @@ class EarthEngine(TethysAppBase):
 
     name = 'Earth Engine'
     index = 'earth_engine:home'
-    icon = 'earth_engine/images/icon.gif'
+    icon = 'earth_engine/images/earth-engine-logo.png'
     package = 'earth_engine'
     root_url = 'earth-engine'
-    color = '#d35400'
+    color = '#524745'
     description = ''
     tags = ''
     enable_feedback = False
