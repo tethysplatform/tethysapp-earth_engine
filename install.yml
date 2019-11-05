@@ -8,8 +8,10 @@ requirements:
   skip: false
   conda:
     channels:
+      - conda-forge
     packages:
-
+      - earthengine-api
+      - oauth2client
   pip:
 
 post:
