@@ -1,7 +1,7 @@
 import datetime as dt
 from django.shortcuts import render
 from tethys_sdk.permissions import login_required
-from tethys_sdk.gizmos import SelectInput, DatePicker, Button
+from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView
 from .gee.products import EE_PRODUCTS
 
 
@@ -116,6 +116,32 @@ def home(request):
         attributes={'id': 'load_map'}
     )
 
+    map_view = MapView(
+        height='100%',
+        width='100%',
+        controls=[
+            'ZoomSlider', 'Rotate', 'FullScreen',
+            {'ZoomToExtent': {
+                'projection': 'EPSG:4326',
+                'extent': [29.25, -4.75, 46.25, 5.2]  #: Kenya
+            }}
+        ],
+        basemap=[
+            'CartoDB',
+            {'CartoDB': {'style': 'dark'}},
+            'OpenStreetMap',
+            'Stamen',
+            'ESRI'
+        ],
+        view=MVView(
+            projection='EPSG:4326',
+            center=[37.880859, 0.219726],
+            zoom=7,
+            maxZoom=18,
+            minZoom=2
+        )
+    )
+
     context = {
         'platform_select': platform_select,
         'sensor_select': sensor_select,
@@ -123,8 +149,9 @@ def home(request):
         'start_date': start_date,
         'end_date': end_date,
         'reducer_select': reducer_select,
-        'ee_products': EE_PRODUCTS,
         'load_button': load_button,
+        'ee_products': EE_PRODUCTS,
+        'map_view': map_view
     }
 
     return render(request, 'earth_engine/home.html', context)

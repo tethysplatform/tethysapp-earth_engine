@@ -1,6 +1,11 @@
 {% extends "earth_engine/base.html" %}
 {% load tethys_gizmos static %}
 
+{% block content_dependent_styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'earth_engine/css/map.css' %}" />
+{% endblock %}
+
 {% block app_navigation_items %}
   <li class="title">Select Dataset</li>
   {% gizmo platform_select %}
@@ -14,6 +19,7 @@
 {% endblock %}
 
 {% block app_content %}
+  {% gizmo map_view %}
 {% endblock %}
 
 {# Use the after_app_content block for modals #}
