@@ -20,3 +20,8 @@
 {% block after_app_content %}
   <div id="ee-products" data-ee-products="{{ ee_products|jsonify }}"></div>
 {% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script src="{% static 'earth_engine/js/gee_datasets.js' %}" type="text/javascript"></script>
+{% endblock %}
