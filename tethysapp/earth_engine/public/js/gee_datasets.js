@@ -22,11 +22,18 @@ var GEE_DATASETS = (function() {
         m_end_date,
         m_reducer;
 
+    // Map Variables
+    var m_map,
+        m_gee_layer;
+
     /************************************************************************
     *                    PRIVATE FUNCTION DECLARATIONS
     *************************************************************************/
     // Dataset Select Methods
     var bind_controls, update_product_options, update_sensor_options, update_date_bounds, collect_data;
+
+    // Map Methods
+    var update_map, update_data_layer, create_data_layer, clear_map;
 
     /************************************************************************
     *                    PRIVATE FUNCTION IMPLEMENTATIONS
@@ -95,8 +102,7 @@ var GEE_DATASETS = (function() {
         });
 
         $('#load_map').on('click', function() {
-            let data = collect_data();
-            console.log(data);
+            update_map();
         });
     };
 
@@ -197,6 +203,34 @@ var GEE_DATASETS = (function() {
         };
         return data;
     };
+
+    // Map Methods
+    update_map = function() {
+        let data = collect_data();
+
+        let xhr = $.ajax({
+            type: 'POST',
+            url: 'get-image-collection/',
+            dataType: 'json',
+            data: data
+        });
+
+        xhr.done(function(response) {
+            if (response.success) {
+                console.log(response.url);
+                update_data_layer(response.url);
+            } else {
+                alert('Oops, there was a problem loading the map you requested. Please try again.');
+            }
+        });
+    };
+
+    update_data_layer = function(url) {};
+
+    create_data_layer = function(url) {};
+
+    clear_map = function() {};
+
 
 
     /************************************************************************
