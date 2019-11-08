@@ -1,8 +1,13 @@
+import logging
 import datetime as dt
+from django.http import JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render
 from tethys_sdk.permissions import login_required
 from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView
 from .gee.products import EE_PRODUCTS
+from .gee.methods import get_image_collection_asset
+
+log = logging.getLogger(f'tethys.apps.{__name__}')
 
 
 @login_required()
@@ -155,3 +160,45 @@ def home(request):
     }
 
     return render(request, 'earth_engine/home.html', context)
+
+
+@login_required()
+def get_image_collection(request):
+    """
+    Controller to handle image collection requests.
+    """
+    response_data = {'success': False}
+
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    try:
+        log.debug(f'POST: {request.POST}')
+
+        platform = request.POST.get('platform', None)
+        sensor = request.POST.get('sensor', None)
+        product = request.POST.get('product', None)
+        start_date = request.POST.get('start_date', None)
+        end_date = request.POST.get('end_date', None)
+        reducer = request.POST.get('reducer', None)
+
+        url = get_image_collection_asset(
+            platform=platform,
+            sensor=sensor,
+            product=product,
+            date_from=start_date,
+            date_to=end_date,
+            reducer=reducer
+        )
+
+        log.debug(f'Image Collection URL: {url}')
+
+        response_data.update({
+            'success': True,
+            'url': url
+        })
+
+    except Exception as e:
+        response_data['error'] = f'Error Processing Request: {e}'
+
+    return JsonResponse(response_data)
