@@ -4,6 +4,7 @@
 {% block content_dependent_styles %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'earth_engine/css/map.css' %}" />
+    <link rel="stylesheet" href="{% static 'earth_engine/css/loader.css' %}" />
 {% endblock %}
 
 {% block app_navigation_items %}
@@ -27,6 +28,9 @@
 {# Use the after_app_content block for modals #}
 {% block after_app_content %}
   <div id="ee-products" data-ee-products="{{ ee_products|jsonify }}"></div>
+  <div id="loader">
+    <img src="{% static 'earth_engine/images/map-loader.gif' %}">
+  </div>
 {% endblock %}
 
 {% block scripts %}

@@ -237,17 +237,29 @@ var GEE_DATASETS = (function() {
         }
     };
 
-
     create_data_layer = function(url) {
         let source = new ol.source.XYZ({
             url: url,
             attributions: '<a href="https://earthengine.google.com" target="_">Google Earth Engine</a>'
         });
 
+        source.on('tileloadstart', function() {
+            $('#loader').addClass('show');
+        });
+
+        source.on('tileloadend', function() {
+            $('#loader').removeClass('show');
+        });
+
+        source.on('tileloaderror', function() {
+            $('#loader').removeClass('show');
+        });
+
         m_gee_layer = new ol.layer.Tile({
             source: source,
             opacity: 0.7
         });
+
         // Insert below the draw layer (so drawn polygons and points render on top of data layer).
         m_map.getLayers().insertAt(1, m_gee_layer);
     };
