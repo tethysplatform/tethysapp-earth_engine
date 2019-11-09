@@ -121,6 +121,13 @@ def home(request):
         attributes={'id': 'load_map'}
     )
 
+    clear_button = Button(
+        name='clear_map',
+        display_text='Clear',
+        style='default',
+        attributes={'id': 'clear_map'}
+    )
+
     map_view = MapView(
         height='100%',
         width='100%',
@@ -155,6 +162,7 @@ def home(request):
         'end_date': end_date,
         'reducer_select': reducer_select,
         'load_button': load_button,
+        'clear_button': clear_button,
         'ee_products': EE_PRODUCTS,
         'map_view': map_view
     }

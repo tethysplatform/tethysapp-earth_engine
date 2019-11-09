@@ -104,6 +104,10 @@ var GEE_DATASETS = (function() {
         $('#load_map').on('click', function() {
             update_map();
         });
+
+        $('#clear_map').on('click', function() {
+            clear_map();
+        });
     };
 
     update_sensor_options = function() {
@@ -248,9 +252,12 @@ var GEE_DATASETS = (function() {
         m_map.getLayers().insertAt(1, m_gee_layer);
     };
 
-    clear_map = function() {};
-
-
+    clear_map = function() {
+        if (m_gee_layer) {
+            m_map.removeLayer(m_gee_layer);
+            m_gee_layer = null;
+        }
+    };
 
     /************************************************************************
     *                            PUBLIC INTERFACE
