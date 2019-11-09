@@ -225,9 +225,28 @@ var GEE_DATASETS = (function() {
         });
     };
 
-    update_data_layer = function(url) {};
+    update_data_layer = function(url) {
+        if (!m_gee_layer) {
+            create_data_layer(url);
+        } else {
+            m_gee_layer.getSource().setUrl(url);
+        }
+    };
 
-    create_data_layer = function(url) {};
+
+    create_data_layer = function(url) {
+        let source = new ol.source.XYZ({
+            url: url,
+            attributions: '<a href="https://earthengine.google.com" target="_">Google Earth Engine</a>'
+        });
+
+        m_gee_layer = new ol.layer.Tile({
+            source: source,
+            opacity: 0.7
+        });
+        // Insert below the draw layer (so drawn polygons and points render on top of data layer).
+        m_map.getLayers().insertAt(1, m_gee_layer);
+    };
 
     clear_map = function() {};
 
@@ -245,16 +264,18 @@ var GEE_DATASETS = (function() {
         // Initialize Global Variables
         bind_controls();
 
-        // Initialize Constants
+        // EE Products
         EE_PRODUCTS = $('#ee-products').data('ee-products');
-        INITIAL_START_DATE = m_start_date = $('#start_date').val();
-        INITIAL_END_DATE = m_end_date = $('#end_date').val();
 
-        // Initialize members
+        // Initialize values
         m_platform = $('#platform').val();
         m_sensor = $('#sensor').val();
         m_product = $('#product').val();
+        INITIAL_START_DATE = m_start_date = $('#start_date').val();
+        INITIAL_END_DATE = m_end_date = $('#end_date').val();
         m_reducer = $('#reducer').val();
+
+        m_map = TETHYS_MAP_VIEW.getMap();
     });
 
     return public_interface;
