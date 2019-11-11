@@ -1,11 +1,14 @@
 import logging
 import datetime as dt
+import geojson
 from django.http import JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render
+from simplejson.errors import JSONDecodeError
+from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, PlotlyView
 from tethys_sdk.permissions import login_required
-from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView
+from .helpers import generate_figure
+from .gee.methods import get_image_collection_asset, get_time_series_from_image_collection
 from .gee.products import EE_PRODUCTS
-from .gee.methods import get_image_collection_asset
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
 
@@ -210,3 +213,75 @@ def get_image_collection(request):
         response_data['error'] = f'Error Processing Request: {e}'
 
     return JsonResponse(response_data)
+
+
+@login_required()
+def get_time_series_plot(request):
+    context = {'success': False}
+
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    try:
+        log.debug(f'POST: {request.POST}')
+
+        platform = request.POST.get('platform', None)
+        sensor = request.POST.get('sensor', None)
+        product = request.POST.get('product', None)
+        start_date = request.POST.get('start_date', None)
+        end_date = request.POST.get('end_date', None)
+        reducer = request.POST.get('reducer', None)
+        index_name = request.POST.get('index_name', None)
+        scale = float(request.POST.get('scale', 250))
+        geometry_str = request.POST.get('geometry', None)
+
+        # Derived parameters
+        ee_product = EE_PRODUCTS[platform][sensor][product]
+        display_name = ee_product['display']
+
+        if not index_name:
+            index_name = ee_product['index']
+
+        try:
+            geometry = geojson.loads(geometry_str)
+        except JSONDecodeError:
+            raise ValueError('Please draw an area of interest.')
+
+        if index_name is None:
+            raise ValueError(f"We're sorry, but plotting {display_name} is not supported at this time. Please select "
+                             f"a different product.")
+
+        time_series = get_time_series_from_image_collection(
+            platform=platform,
+            sensor=sensor,
+            product=product,
+            index_name=index_name,
+            scale=scale,
+            geometry=geometry,
+            date_from=start_date,
+            date_to=end_date,
+            reducer=reducer
+        )
+
+        log.debug(f'Time Series: {time_series}')
+
+        figure = generate_figure(
+            figure_title=display_name,
+            time_series=time_series
+        )
+
+        plot_view = PlotlyView(figure, height='200px', width='100%')
+
+        context.update({
+            'success': True,
+            'plot_view': plot_view
+        })
+
+    except ValueError as e:
+        context['error'] = str(e)
+
+    except Exception:
+        context['error'] = f'An unexpected error has occurred. Please try again.'
+        log.exception('An unexpected error occurred.')
+
+    return render(request, 'earth_engine/plot.html', context)

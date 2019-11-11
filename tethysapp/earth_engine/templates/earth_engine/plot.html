@@ -1,0 +1,11 @@
+{% load tethys_gizmos %}
+
+{% if plot_view %}
+  {% gizmo plot_view %}
+{% endif %}
+
+{% if error %}
+  <div class="alert alert-danger" role="alert">
+    <span>{{ error }}</span>
+  </div>
+{% endif %}

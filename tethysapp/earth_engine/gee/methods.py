@@ -1,9 +1,12 @@
 import logging
 import ee
 from ee.ee_exception import EEException
+import geojson
+import pandas as pd
 from . import params as gee_account
-from .products import EE_PRODUCTS
 from . import cloud_mask as cm
+from .products import EE_PRODUCTS
+
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
 
@@ -85,3 +88,65 @@ def get_image_collection_asset(platform, sensor, product, date_from=None, date_t
 
     except EEException:
         log.exception('An error occurred while attempting to retrieve the image collection asset.')
+
+
+def get_time_series_from_image_collection(platform, sensor, product, index_name, scale=30, geometry=None,
+                                      date_from=None, date_to=None, reducer='median'):
+    """
+    Derive time series at given geometry.
+    """
+    time_series = []
+    ee_product = EE_PRODUCTS[platform][sensor][product]
+    collection_name = ee_product['collection']
+
+    if not isinstance(geometry, geojson.GeometryCollection):
+        raise ValueError('Geometry must be a valid geojson.GeometryCollection')
+
+    for geom in geometry.geometries:
+        log.debug(f'Computing Time Series for Geometry of Type: {geom.type}')
+
+        try:
+            ee_geometry = None
+            if isinstance(geom, geojson.Polygon):
+                ee_geometry = ee.Geometry.Polygon(geom.coordinates)
+            elif isinstance(geom, geojson.Point):
+                ee_geometry = ee.Geometry.Point(geom.coordinates)
+            else:
+                raise ValueError('Only Points and Polygons are supported.')
+
+            if date_from is not None:
+                if index_name is not None:
+                    indexCollection = ee.ImageCollection(collection_name) \
+                        .filterDate(date_from, date_to) \
+                        .select(index_name)
+                else:
+                    indexCollection = ee.ImageCollection(collection_name) \
+                        .filterDate(date_from, date_to)
+            else:
+                indexCollection = ee.ImageCollection(collection_name)
+
+            def get_index(image):
+                if reducer:
+                    the_reducer = getattr(ee.Reducer, reducer)()
+
+                if index_name is not None:
+                    index_value = image.reduceRegion(the_reducer, ee_geometry, scale).get(index_name)
+                else:
+                    index_value = image.reduceRegion(the_reducer, ee_geometry, scale)
+
+                date = image.get('system:time_start')
+                index_image = ee.Image().set('indexValue', [ee.Number(date), index_value])
+                return index_image
+
+            index_collection = indexCollection.map(get_index)
+            index_collection_agg = index_collection.aggregate_array('indexValue')
+            values = index_collection_agg.getInfo()
+            log.debug('Values acquired.')
+            df = pd.DataFrame(values, columns=['Time', index_name.replace("_", " ")])
+            time_series.append(df)
+
+        except EEException:
+            log.exception('An error occurred while attempting to retrieve the time series.')
+
+    log.debug(f'Time Series: {time_series}')
+    return time_series

@@ -12,6 +12,7 @@ requirements:
     packages:
       - earthengine-api
       - oauth2client
+      - geojson
   pip:
 
 post:
