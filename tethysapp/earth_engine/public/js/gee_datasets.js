@@ -113,7 +113,7 @@ var GEE_DATASETS = (function() {
         });
 
         $('#load_plot').on('click', function() {
-           show_plot_modal();
+            update_plot();
         });
     };
 
@@ -210,7 +210,8 @@ var GEE_DATASETS = (function() {
             product: m_product,
             start_date: m_start_date,
             end_date: m_end_date,
-            reducer: m_reducer
+            reducer: m_reducer,
+            geometry: get_geometry()
         };
         return data;
     };
@@ -279,9 +280,19 @@ var GEE_DATASETS = (function() {
     };
 
     // Time Series Plot Methods
-    get_geometry = function() {};
+    get_geometry = function() {
+        // Get drawn geometry from embedded textarea of Tethys Map View
+        let geometry_json = $('#map_view_geometry').val() || null;
+        return geometry_json;
+    };
 
-    update_plot = function() {};
+    update_plot = function() {
+        let data = collect_data();
+
+        show_plot_modal();
+
+        $('#plot-container').load('get-time-series-plot/', data);
+    };
 
     show_plot_modal = function() {
         $('#plot-container').html(

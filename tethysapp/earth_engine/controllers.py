@@ -4,7 +4,7 @@ import geojson
 from django.http import JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render
 from simplejson.errors import JSONDecodeError
-from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, PlotlyView
+from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, PlotlyView, MVDraw
 from tethys_sdk.permissions import login_required
 from .helpers import generate_figure
 from .gee.methods import get_image_collection_asset, get_time_series_from_image_collection
@@ -145,7 +145,7 @@ def home(request):
             'ZoomSlider', 'Rotate', 'FullScreen',
             {'ZoomToExtent': {
                 'projection': 'EPSG:4326',
-                'extent': [29.25, -4.75, 46.25, 5.2]  #: Kenya
+                'extent': [29.25, -4.75, 46.25, 5.2]
             }}
         ],
         basemap=[
@@ -161,6 +161,11 @@ def home(request):
             zoom=7,
             maxZoom=18,
             minZoom=2
+        ),
+        draw=MVDraw(
+            controls=['Pan', 'Modify', 'Delete', 'Move', 'Point', 'Polygon', 'Box'],
+            initial='Pan',
+            output_format='GeoJSON'
         )
     )
 

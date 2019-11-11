@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="{% static 'earth_engine/css/plot.css' %}" />
 {% endblock %}
 
+{% block import_gizmos %}
+  {% import_gizmo_dependency plotly_view %}
+{% endblock %}
+
 {% block app_navigation_items %}
   <li class="title">Select Dataset</li>
   {% gizmo platform_select %}
