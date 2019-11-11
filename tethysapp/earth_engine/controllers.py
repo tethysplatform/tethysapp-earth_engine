@@ -131,6 +131,13 @@ def home(request):
         attributes={'id': 'clear_map'}
     )
 
+    plot_button = Button(
+        name='load_plot',
+        display_text='Plot AOI',
+        style='default',
+        attributes={'id': 'load_plot'}
+    )
+
     map_view = MapView(
         height='100%',
         width='100%',
@@ -166,6 +173,7 @@ def home(request):
         'reducer_select': reducer_select,
         'load_button': load_button,
         'clear_button': clear_button,
+        'plot_button': plot_button,
         'ee_products': EE_PRODUCTS,
         'map_view': map_view
     }

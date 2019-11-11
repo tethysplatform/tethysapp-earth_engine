@@ -108,6 +108,10 @@ var GEE_DATASETS = (function() {
         $('#clear_map').on('click', function() {
             clear_map();
         });
+
+        $('#load_plot').on('click', function() {
+           $('#plot-modal').modal('show');
+        });
     };
 
     update_sensor_options = function() {

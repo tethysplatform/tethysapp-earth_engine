@@ -18,8 +18,9 @@
   <p class="help">Change variables to select a data product, then press "Load" to add that product to the map.</p>
   {% gizmo load_button %}
   {% gizmo clear_button %}
+  <p class="help">Draw an area of interest or drop a point, the press "Plot AOI" to view a plot of the data.</p>
+  {% gizmo plot_button %}
 {% endblock %}
-
 
 {% block app_content %}
   {% gizmo map_view %}
@@ -27,6 +28,21 @@
 
 {# Use the after_app_content block for modals #}
 {% block after_app_content %}
+  <!-- Plot Modal -->
+  <div class="modal fade" id="plot-modal" tabindex="-1" role="dialog" aria-labelledby="plot-modal-label">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h5 class="modal-title" id="plot-modal-label">Area of Interest Plot</h5>
+        </div>
+        <div class="modal-body">
+          <div id="plot-container"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End Plot Modal -->
   <div id="ee-products" data-ee-products="{{ ee_products|jsonify }}"></div>
   <div id="loader">
     <img src="{% static 'earth_engine/images/map-loader.gif' %}">
