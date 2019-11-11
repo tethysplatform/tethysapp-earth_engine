@@ -1,0 +1,11 @@
+#plot-loader {
+    margin: 65px 84px;
+}
+
+#plot-loader p {
+    text-align: center;
+}
+
+#plot-modal .modal-body {
+    min-height: 480px;
+}

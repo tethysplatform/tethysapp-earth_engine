@@ -35,6 +35,9 @@ var GEE_DATASETS = (function() {
     // Map Methods
     var update_map, update_data_layer, create_data_layer, clear_map;
 
+    // Time Series Plot Methods
+    var get_geometry, update_plot, show_plot_modal;
+
     /************************************************************************
     *                    PRIVATE FUNCTION IMPLEMENTATIONS
     *************************************************************************/
@@ -110,7 +113,7 @@ var GEE_DATASETS = (function() {
         });
 
         $('#load_plot').on('click', function() {
-           $('#plot-modal').modal('show');
+           show_plot_modal();
         });
     };
 
@@ -273,6 +276,21 @@ var GEE_DATASETS = (function() {
             m_map.removeLayer(m_gee_layer);
             m_gee_layer = null;
         }
+    };
+
+    // Time Series Plot Methods
+    get_geometry = function() {};
+
+    update_plot = function() {};
+
+    show_plot_modal = function() {
+        $('#plot-container').html(
+            '<div id="plot-loader">' +
+                '<img src="/static/earth_engine/images/plot-loader.gif">' +
+                '<p>Loading... This may take up to 5 minutes. Please wait.</p>' +
+            '</div>'
+        );
+        $('#plot-modal').modal('show');
     };
 
     /************************************************************************
