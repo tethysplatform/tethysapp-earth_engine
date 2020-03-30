@@ -12,6 +12,12 @@
   {% import_gizmo_dependency plotly_view %}
 {% endblock %}
 
+{% block header_buttons %}
+  <div class="header-button glyphicon-button">
+    <a href="{% url 'earth_engine:home' %}" title="Home"><span class="glyphicon glyphicon-home"></span></a>
+  </div>
+{% endblock %}
+
 {% block app_navigation_items %}
   <li class="title">Select Dataset</li>
   {% gizmo platform_select %}
