@@ -1,0 +1,60 @@
+{% extends "earth_engine/base.html" %}
+{% load tethys_gizmos static %}
+
+{% block content_dependent_styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'earth_engine/css/map.css' %}" />
+    <link rel="stylesheet" href="{% static 'earth_engine/css/loader.css' %}" />
+    <link rel="stylesheet" href="{% static 'earth_engine/css/plot.css' %}" />
+{% endblock %}
+
+{% block import_gizmos %}
+  {% import_gizmo_dependency plotly_view %}
+{% endblock %}
+
+{% block app_navigation_items %}
+  <li class="title">Select Dataset</li>
+  {% gizmo platform_select %}
+  {% gizmo sensor_select %}
+  {% gizmo product_select %}
+  {% gizmo start_date %}
+  {% gizmo end_date %}
+  {% gizmo reducer_select %}
+  <p class="help">Change variables to select a data product, then press "Load" to add that product to the map.</p>
+  {% gizmo load_button %}
+  {% gizmo clear_button %}
+  <p class="help">Draw an area of interest or drop a point, the press "Plot AOI" to view a plot of the data.</p>
+  {% gizmo plot_button %}
+{% endblock %}
+
+{% block app_content %}
+  {% gizmo map_view %}
+{% endblock %}
+
+{# Use the after_app_content block for modals #}
+{% block after_app_content %}
+  <!-- Plot Modal -->
+  <div class="modal fade" id="plot-modal" tabindex="-1" role="dialog" aria-labelledby="plot-modal-label">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h5 class="modal-title" id="plot-modal-label">Area of Interest Plot</h5>
+        </div>
+        <div class="modal-body">
+          <div id="plot-container"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End Plot Modal -->
+  <div id="ee-products" data-ee-products="{{ ee_products|jsonify }}"></div>
+  <div id="loader">
+    <img src="{% static 'earth_engine/images/map-loader.gif' %}">
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script src="{% static 'earth_engine/js/gee_datasets.js' %}" type="text/javascript"></script>
+{% endblock %}

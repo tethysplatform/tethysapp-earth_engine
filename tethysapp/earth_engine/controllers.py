@@ -18,6 +18,15 @@ def home(request):
     """
     Controller for the app home page.
     """
+    context = {}
+    return render(request, 'earth_engine/home.html', context)
+
+
+@login_required()
+def viewer(request):
+    """
+    Controller for the app home page.
+    """
     default_platform = 'modis'
     default_sensors = EE_PRODUCTS[default_platform]
     first_sensor_key = next(iter(default_sensors.keys()))
@@ -183,7 +192,7 @@ def home(request):
         'map_view': map_view
     }
 
-    return render(request, 'earth_engine/home.html', context)
+    return render(request, 'earth_engine/viewer.html', context)
 
 
 @login_required()
