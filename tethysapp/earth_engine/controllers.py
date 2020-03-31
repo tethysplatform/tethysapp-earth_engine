@@ -6,7 +6,8 @@ from django.shortcuts import render
 from simplejson.errors import JSONDecodeError
 from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, PlotlyView, MVDraw
 from tethys_sdk.permissions import login_required
-from .helpers import generate_figure
+from tethys_sdk.workspaces import user_workspace
+from .helpers import generate_figure, handle_shapefile_upload
 from .gee.methods import get_image_collection_asset, get_time_series_from_image_collection
 from .gee.products import EE_PRODUCTS
 
@@ -23,7 +24,8 @@ def home(request):
 
 
 @login_required()
-def viewer(request):
+@user_workspace
+def viewer(request, user_workspace):
     """
     Controller for the app home page.
     """
@@ -178,6 +180,23 @@ def viewer(request):
         )
     )
 
+    # Boundary Upload Form
+    set_boundary_button = Button(
+        name='set_boundary',
+        display_text='Set Boundary',
+        style='default',
+        attributes={
+            'id': 'set_boundary',
+            'data-toggle': 'modal',
+            'data-target': '#set-boundary-modal'
+        }
+    )
+
+    set_boundary_error = ''
+
+    if request.POST and request.FILES:
+        set_boundary_error = handle_shapefile_upload(request, user_workspace)
+
     context = {
         'platform_select': platform_select,
         'sensor_select': sensor_select,
@@ -188,6 +207,8 @@ def viewer(request):
         'load_button': load_button,
         'clear_button': clear_button,
         'plot_button': plot_button,
+        'set_boundary_button': set_boundary_button,
+        'set_boundary_error': set_boundary_error,
         'ee_products': EE_PRODUCTS,
         'map_view': map_view
     }

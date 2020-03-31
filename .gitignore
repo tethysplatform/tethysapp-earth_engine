@@ -8,4 +8,5 @@
 *.sqlite
 *.DS_Store
 .idea/
+tethysapp/earth_engine/workspaces/
 services.yml
