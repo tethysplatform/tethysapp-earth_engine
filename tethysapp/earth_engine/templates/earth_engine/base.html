@@ -12,6 +12,13 @@
 {# The name you provided in your app.py is accessible through the tethys_app.name context variable #}
 {% block app_title %}{{ tethys_app.name }}{% endblock %}
 
+{% block header_buttons %}
+  {{ block.super }}
+  <div class="header-button glyphicon-button">
+    <a data-toggle="modal" data-target="#info-modal" title="Info"><span class="glyphicon glyphicon-info-sign"></span></a>
+  </div>
+{% endblock %}
+
 {% block app_navigation_items %}
   <li class="title">App Navigation</li>
   <li class="active"><a href="">Home</a></li>
@@ -31,9 +38,48 @@
 {% block app_actions_override %}
 {% endblock %}
 
+{# Use the after_app_content block for modals #}
+{% block after_app_content %}
+  {{ block.super }}
+  <!-- Info Modal -->
+  <div class="modal fade" id="info-modal" tabindex="-1" role="dialog" aria-labelledby="info-modal-label">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h2 class="modal-title" id="info-modal-label">Disclaimer</h2>
+        </div>
+        <div class="modal-body">
+          <div id="info-container">
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque sed ipsum mollis, congue metus vitae, fringilla tortor. Cras non magna tempus, pretium nibh a, accumsan sapien. Quisque quis diam justo. Mauris ut diam molestie, scelerisque nibh ac, convallis mauris. Sed risus ex, blandit eu lectus vitae, vulputate fermentum metus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Integer pretium sagittis arcu at aliquet. Quisque quis sodales urna. Suspendisse nisl odio, facilisis ac iaculis quis, accumsan non justo. Nunc eu porttitor neque.</p>
+            <p>Sed vel nisl leo. Quisque venenatis erat nec erat laoreet, ac vulputate magna sodales. Ut in enim finibus, finibus orci sit amet, feugiat erat. Vivamus id lorem arcu. Integer lacus lorem, rhoncus vitae elit eu, vestibulum placerat nibh. Ut eget lectus in quam blandit molestie nec et leo. Ut augue libero, commodo id ligula sit amet, placerat molestie enim. Cras justo odio, vulputate id odio non, ultricies mollis sem. Integer et vestibulum erat, eu dictum nunc. Donec eu diam ac ligula aliquam egestas in non lectus. Nullam quis arcu eget massa feugiat sollicitudin. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla quis urna efficitur, sagittis ante eget, accumsan nulla.</p>
+            <p>Pellentesque tempor neque in odio ullamcorper, a varius lectus euismod. Donec odio nunc, mollis aliquam imperdiet eget, lacinia sit amet dui. Morbi quis pellentesque lorem. Nam volutpat vestibulum ex vel interdum. Etiam accumsan luctus felis gravida sodales. Praesent malesuada lectus tortor, at maximus velit fringilla sed. Ut consequat nisl ut pretium egestas.</p>
+            <p>Quisque tincidunt ex a sem sagittis molestie. Nunc pellentesque et tortor quis lobortis. Etiam eget justo risus. Nunc a lobortis quam, id varius ante. Maecenas at rhoncus enim. Maecenas aliquam non elit quis tempor. Morbi eu ligula imperdiet, imperdiet neque non, faucibus eros. Vivamus ac sollicitudin nunc. Vivamus sagittis ut orci eu auctor. Nulla sit amet facilisis felis, eu tincidunt sapien. Nulla sit amet dignissim nisi. Cras pellentesque rutrum rhoncus. Nulla nibh erat, congue sit amet feugiat in, eleifend at massa. Maecenas risus massa, placerat non velit vel, laoreet cursus nunc.</p>
+            <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam ultricies accumsan elit vel volutpat. Proin nec nibh ac dolor tempor sollicitudin. Praesent nisi elit, placerat eget diam nec, viverra euismod felis. Nunc accumsan nulla non eros bibendum, mollis hendrerit enim cursus. In ex lorem, hendrerit ut nibh nec, vestibulum placerat massa. Proin at odio non nisl eleifend venenatis ut at tortor.</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div id="sponsors-container">
+            <h6>Sponsors:</h6>
+            <img src="https://via.placeholder.com/50/0000ff/000000?text=1">
+            <img src="https://via.placeholder.com/50/00ff00/000000?text=2">
+            <img src="https://via.placeholder.com/50/ff0000/000000?text=3">
+            <img src="https://via.placeholder.com/50/00ffff/000000?text=4">
+            <img src="https://via.placeholder.com/50/ffff00/000000?text=5">
+            <img src="https://via.placeholder.com/50/ff8800/000000?text=6">
+            <img src="https://via.placeholder.com/50/8800ff/000000?text=7">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End Info Modal -->
+{% endblock %}
+
 {% block content_dependent_styles %}
   {{ block.super }}
   <link href="{% static 'earth_engine/css/main.css' %}" rel="stylesheet"/>
+  <link href="{% static 'earth_engine/css/info_modal.css' %}" rel="stylesheet"/>
 {% endblock %}
 
 {% block scripts %}
