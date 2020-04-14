@@ -1,0 +1,16 @@
+#nav-title-wrapper {
+  margin-left: 15px;
+}
+
+#app-content-wrapper #app-content {
+  height: 100%;
+}
+
+#app-content-wrapper.show-nav #app-content {
+  padding-right: 0;
+  transform: none;
+}
+
+#inner-app-content {
+  padding: 0;
+}

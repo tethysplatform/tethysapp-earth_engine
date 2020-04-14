@@ -44,6 +44,11 @@ class EarthEngine(TethysAppBase):
                 url='earth-engine/viewer/get-time-series-plot',
                 controller='earth_engine.controllers.get_time_series_plot'
             ),
+            UrlMap(
+                name='about',
+                url='earth-engine/about',
+                controller='earth_engine.controllers.about'
+            )
         )
 
         return url_maps

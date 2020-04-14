@@ -328,3 +328,8 @@ def get_time_series_plot(request):
         log.exception('An unexpected error occurred.')
 
     return render(request, 'earth_engine/plot.html', context)
+
+
+def about(request):
+    context = {}
+    return render(request, 'earth_engine/about.html', context)
