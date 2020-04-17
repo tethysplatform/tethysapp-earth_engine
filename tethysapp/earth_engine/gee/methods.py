@@ -1,3 +1,4 @@
+import math
 import logging
 import os
 import ee
@@ -277,9 +278,43 @@ def get_boundary_fc_for_user(user):
         # If no boundary exists for the user, an exception occur when calling this and clipping will skipped
         ee.batch.data.getAsset(boundary_path)
         # Add the clip option
-        clip_features = ee.FeatureCollection(boundary_path)
-        return clip_features
+        fc = ee.FeatureCollection(boundary_path)
+        return fc
     except EEException:
         pass
 
     return None
+
+
+def get_boundary_fc_props_for_user(user):
+    """
+
+    Args:
+        user:
+
+    Returns:
+    """
+    fc = get_boundary_fc_for_user(user)
+
+    if not fc:
+        return dict()
+
+    # Compute bounding box
+    bounding_rect = fc.geometry().bounds().getInfo()
+    bounding_coords = bounding_rect.get('coordinates')[0]
+    bbox = [bounding_coords[0][0], bounding_coords[0][1], bounding_coords[2][0], bounding_coords[2][1]]
+
+    # Get centroid
+    centroid = fc.geometry().centroid().getInfo()
+
+    # Compute length diagonal of bbox for zoom calulation
+    diag = math.sqrt((bbox[0] - bbox[2])**2 + (bbox[1] - bbox[3])**2)
+    zoom = round((-0.0701 * diag) + 8.34, 0)
+
+    fc_props = {
+        'zoom': zoom,
+        'bbox': bbox,
+        'centroid': centroid.get('coordinates')
+    }
+
+    return fc_props

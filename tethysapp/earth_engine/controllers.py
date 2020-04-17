@@ -8,7 +8,8 @@ from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, 
 from tethys_sdk.permissions import login_required
 from tethys_sdk.workspaces import user_workspace
 from .helpers import generate_figure, handle_shapefile_upload
-from .gee.methods import get_image_collection_asset, get_time_series_from_image_collection
+from .gee.methods import get_image_collection_asset, get_time_series_from_image_collection, \
+    get_boundary_fc_props_for_user
 from .gee.products import EE_PRODUCTS
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
@@ -149,6 +150,9 @@ def viewer(request, user_workspace):
         attributes={'id': 'load_plot'}
     )
 
+    # Get bounding box from user boundary if it exists
+    boundary_props = get_boundary_fc_props_for_user(request.user)
+
     map_view = MapView(
         height='100%',
         width='100%',
@@ -156,7 +160,7 @@ def viewer(request, user_workspace):
             'ZoomSlider', 'Rotate', 'FullScreen',
             {'ZoomToExtent': {
                 'projection': 'EPSG:4326',
-                'extent': [29.25, -4.75, 46.25, 5.2]
+                'extent': boundary_props.get('bbox', [29.25, -4.75, 46.25, 5.2])  # Default to Kenya
             }}
         ],
         basemap=[
@@ -168,8 +172,8 @@ def viewer(request, user_workspace):
         ],
         view=MVView(
             projection='EPSG:4326',
-            center=[37.880859, 0.219726],
-            zoom=7,
+            center=boundary_props.get('centroid', [37.880859, 0.219726]),  # Default to Kenya
+            zoom=boundary_props.get('zoom', 7),  # Default to Kenya
             maxZoom=18,
             minZoom=2
         ),
