@@ -2,7 +2,6 @@ import os
 import tempfile
 import zipfile
 import glob
-from pprint import pprint
 import shapefile
 import ee
 import pandas as pd

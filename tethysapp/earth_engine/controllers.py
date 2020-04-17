@@ -1,7 +1,7 @@
 import logging
 import datetime as dt
 import geojson
-from django.http import JsonResponse, HttpResponseNotAllowed
+from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import render
 from simplejson.errors import JSONDecodeError
 from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, PlotlyView, MVDraw
@@ -196,6 +196,10 @@ def viewer(request, user_workspace):
 
     if request.POST and request.FILES:
         set_boundary_error = handle_shapefile_upload(request, user_workspace)
+
+        if not set_boundary_error:
+            # Redirect back to this page to clear form
+            return HttpResponseRedirect(request.path)
 
     context = {
         'platform_select': platform_select,
