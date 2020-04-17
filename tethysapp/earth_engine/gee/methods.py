@@ -37,11 +37,8 @@ def image_to_map_id(image_name, vis_params={}):
     try:
         ee_image = ee.Image(image_name)
         map_id = ee_image.getMapId(vis_params)
-        map_id_params = {
-            'mapid': map_id['mapid'],
-            'token': map_id['token']
-        }
-        return map_id_params
+        tile_url = map_id['tile_fetcher'].url_format
+        return tile_url
 
     except EEException:
         log.exception('An error occurred while attempting to retrieve the map id.')
@@ -62,8 +59,6 @@ def get_image_collection_asset(platform, sensor, product, date_from=None, date_t
     log.debug(f'Band Selector: {index}')
     log.debug(f'Vis Params: {vis_params}')
 
-    tile_url_template = "https://earthengine.googleapis.com/map/{mapid}/{{z}}/{{x}}/{{y}}?token={token}"
-
     try:
         ee_collection = ee.ImageCollection(collection)
 
@@ -82,9 +77,9 @@ def get_image_collection_asset(platform, sensor, product, date_from=None, date_t
         if reducer:
             ee_collection = getattr(ee_collection, reducer)()
 
-        map_id_params = image_to_map_id(ee_collection, vis_params)
+        tile_url = image_to_map_id(ee_collection, vis_params)
 
-        return tile_url_template.format(**map_id_params)
+        return tile_url
 
     except EEException:
         log.exception('An error occurred while attempting to retrieve the image collection asset.')
