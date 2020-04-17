@@ -2,7 +2,9 @@ import os
 import tempfile
 import zipfile
 import glob
+from pprint import pprint
 import shapefile
+import ee
 import pandas as pd
 from plotly import graph_objs as go
 
@@ -57,12 +59,20 @@ def generate_figure(figure_title, time_series):
 
 
 def handle_shapefile_upload(request, user_workspace):
+    """
+    Uploads shapefile to Google Earth Engine as an Asset.
+
+    Args:
+        request (django.Request): the request object.
+        user_workspace (tethys_sdk.workspaces.Workspace): the User workspace object.
+
+    Returns:
+        str: Error string if errors occurred.
+    """
     # Write file to temp for processing
     uploaded_file = request.FILES['boundary-file']
 
     with tempfile.TemporaryDirectory() as temp_dir:
-        print(temp_dir)
-
         temp_zip_path = os.path.join(temp_dir, 'boundary.zip')
 
         # Use with statements to ensure opened files are closed when done
@@ -85,33 +95,43 @@ def handle_shapefile_upload(request, user_workspace):
             shapefile_path = find_shapefile(temp_dir)
 
             if not shapefile_path:
-                return 'No file with extension ".shp" found in archive provided.'
+                return 'No Shapefile found in the archive provided.'
 
             with shapefile.Reader(shapefile_path) as shp_file:
-                print(shp_file)
-
                 # Check type (only Polygon supported)
                 if shp_file.shapeType != shapefile.POLYGON:
                     return 'Only shapefiles containing Polygons are supported.'
 
                 # Setup workspace directory for storing shapefile
-                workspace_dir = setup_workspace_dir(user_workspace)
+                workspace_dir = prep_boundary_dir(user_workspace.path)
 
                 # Write the shapefile to the workspace directory
-                write_shapefile_to_workspace(shp_file, workspace_dir)
+                write_boundary_shapefile(shp_file, workspace_dir)
+
+                # Upload shapefile as Asset in GEE
+                upload_shapefile_to_gee(request.user, shp_file)
 
         except TypeError:
             return 'Incomplete or corrupted shapefile provided.'
 
+        except ee.EEException:
+            return 'An unexpected error occurred while uploading the shapefile to Google Earth Engine.'
 
-def find_shapefile(temp_dir):
+
+def find_shapefile(directory):
     """
     Recursively find the path to the first file with an extension ".shp" in the given directory.
+
+    Args:
+        directory (str): Path of directory to search for shapefile.
+
+    Returns:
+        str: Path to first shapefile found in given directory.
     """
     shapefile_path = ''
 
-    # Scan the temp directory usign walk, searching for a shapefile (.shp extension)
-    for root, dirs, files in os.walk(temp_dir):
+    # Scan the temp directory using walk, searching for a shapefile (.shp extension)
+    for root, dirs, files in os.walk(directory):
         for f in files:
             f_path = os.path.join(root, f)
             f_ext = os.path.splitext(f_path)[1]
@@ -123,30 +143,45 @@ def find_shapefile(temp_dir):
     return shapefile_path
 
 
-def write_shapefile_to_workspace(in_shp, workspace_dir):
+def write_boundary_shapefile(shp_file, directory):
     """
-    Write the shapefile to the workspace directory.
+    Write the shapefile to the given directory. The shapefile will be called "boundary.shp".
+
+    Args:
+        shp_file (shapefile.Reader): A shapefile reader object.
+        directory (str): Path to directory to which to write shapefile.
+
+    Returns:
+        str: path to shapefile that was written.
     """
     # Name the shapefiles boundary.* (boundary.shp, boundary.dbf, boundary.shx)
-    boundary_shp = os.path.join(workspace_dir, 'boundary')
+    shapefile_path = os.path.join(directory, 'boundary')
 
     # Write contents of shapefile to new shapfile
-    with shapefile.Writer(boundary_shp) as out_shp:
+    with shapefile.Writer(shapefile_path) as out_shp:
         # Based on https://pypi.org/project/pyshp/#examples
-        out_shp.fields = in_shp.fields[1:]  # skip the deletion field
+        out_shp.fields = shp_file.fields[1:]  # skip the deletion field
 
         # Add the existing shape objects
-        for shaperec in in_shp.iterShapeRecords():
+        for shaperec in shp_file.iterShapeRecords():
             out_shp.record(*shaperec.record)
             out_shp.shape(shaperec.shape)
 
+    return shapefile_path
 
-def setup_workspace_dir(user_workspace):
+
+def prep_boundary_dir(root_path):
     """
-    Setup the workspace directory that will store the uploaded shapefiles.
+    Setup the workspace directory that will store the uploaded boundary shapefile.
+
+    Args:
+        root_path (str): path to the root directory where the boundary directory will be located.
+
+    Returns:
+        str: path to boundary directory for storing boundary shapefile.
     """
     # Copy into new shapefile in user directory
-    boundary_dir = os.path.join(user_workspace.path, 'boundary')
+    boundary_dir = os.path.join(root_path, 'boundary')
 
     # Make the directory if it doesn't exist
     if not os.path.isdir(boundary_dir):
@@ -162,3 +197,112 @@ def setup_workspace_dir(user_workspace):
             os.remove(f)
 
     return boundary_dir
+
+
+def get_asset_dir_for_user(user):
+    """
+    Get a unique asset directory for given user.
+
+    Args:
+        user (django.contrib.auth.User): the request user.
+
+    Returns:
+        str: asset directory path for given user.
+    """
+    asset_roots = ee.batch.data.getAssetRoots()
+
+    if len(asset_roots) < 1:
+        raise FileNotFoundError('No asset root directory could be found. '
+                                'Please setup an asset root directory in the '
+                                'Google Earth Engine account associated with '
+                                'this app to use this feature.')
+
+    asset_root_dir = asset_roots[0]['id']
+    earth_engine_root_dir = os.path.join(asset_root_dir, 'earth_engine_app')
+    user_root_dir = os.path.join(earth_engine_root_dir, user.username)
+
+    # Create earth engine directory, will raise exception if it already exists
+    try:
+        ee.batch.data.createAsset({
+            'type': 'Folder',
+            'name': earth_engine_root_dir
+        })
+    except ee.EEException as e:
+        if 'Cannot overwrite asset' not in str(e):
+            raise e
+
+    # Create user directory, will raise exception if it already exists
+    try:
+        ee.batch.data.createAsset({
+            'type': 'Folder',
+            'name': user_root_dir
+        })
+    except ee.EEException as e:
+        if 'Cannot overwrite asset' not in str(e):
+            raise e
+
+    return user_root_dir
+
+
+def get_user_boundary_path(user):
+    """
+    Get a unique path for the user boundary asset.
+
+    Args:
+        user (django.contrib.auth.User): the request user.
+
+    Returns:
+        str: the unique path for the user boundary asset.
+    """
+    user_asset_dir = get_asset_dir_for_user(user)
+    user_boundary_asset_path = os.path.join(user_asset_dir, 'boundary')
+    return user_boundary_asset_path
+
+
+def upload_shapefile_to_gee(user, shp_file):
+    """
+    Upload a shapefile to Google Earth Engine as an asset.
+
+    Args:
+        user (django.contrib.auth.User): the request user.
+        shp_file (shapefile.Reader): A shapefile reader object.
+    """
+    features = []
+    fields = shp_file.fields[1:]
+    field_names = [field[0] for field in fields]
+
+    # Convert Shapefile to ee.Features
+    for record in shp_file.shapeRecords():
+        # First convert to geojson
+        attributes = dict(zip(field_names, record.record))
+        geojson_geom = record.shape.__geo_interface__
+        geojson_feature = {
+            'type': 'Feature',
+            'geometry': geojson_geom,
+            'properties': attributes
+        }
+
+        # Create ee.Feature from geojson (this is the Upload, b/c ee.Feature is a server object)
+        features.append(ee.Feature(geojson_feature))
+
+    feature_collection = ee.FeatureCollection(features)
+
+    # Get unique folder for each user to story boundary asset
+    user_boundary_asset_path = get_user_boundary_path(user)
+
+    # Overwrite an existing asset with this name by deleting it first
+    try:
+        ee.batch.data.deleteAsset(user_boundary_asset_path)
+    except ee.EEException as e:
+        # Nothing to delete, so pass
+        if 'Asset not found' not in str(e):
+            raise e
+
+    # Export ee.Feature to ee.Asset
+    task = ee.batch.Export.table.toAsset(
+        collection=feature_collection,
+        description='uploadToTableAsset',
+        assetId=user_boundary_asset_path
+    )
+
+    task.start()

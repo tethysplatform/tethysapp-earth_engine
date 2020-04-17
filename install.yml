@@ -10,7 +10,7 @@ requirements:
     channels:
       - conda-forge
     packages:
-      - earthengine-api=0.1.205
+      - earthengine-api >=0.1.218
       - oauth2client
       - geojson
       - pyshp
