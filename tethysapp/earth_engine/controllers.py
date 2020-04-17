@@ -241,6 +241,7 @@ def get_image_collection(request):
         reducer = request.POST.get('reducer', None)
 
         url = get_image_collection_asset(
+            request=request,
             platform=platform,
             sensor=sensor,
             product=product,

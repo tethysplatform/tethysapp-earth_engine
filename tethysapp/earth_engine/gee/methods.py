@@ -1,4 +1,5 @@
 import logging
+import os
 import ee
 from ee.ee_exception import EEException
 import geojson
@@ -6,7 +7,6 @@ import pandas as pd
 from . import params as gee_account
 from . import cloud_mask as cm
 from .products import EE_PRODUCTS
-
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
 
@@ -30,12 +30,12 @@ else:
         ee.Initialize(credentials)
 
 
-def image_to_map_id(image_name, vis_params={}):
+def image_to_map_id(ee_image, vis_params={}):
     """
     Get map_id parameters
     """
     try:
-        ee_image = ee.Image(image_name)
+        ee_image = ee.Image(ee_image)
         map_id = ee_image.getMapId(vis_params)
         tile_url = map_id['tile_fetcher'].url_format
         return tile_url
@@ -44,7 +44,7 @@ def image_to_map_id(image_name, vis_params={}):
         log.exception('An error occurred while attempting to retrieve the map id.')
 
 
-def get_image_collection_asset(platform, sensor, product, date_from=None, date_to=None, reducer='median'):
+def get_image_collection_asset(request, platform, sensor, product, date_from=None, date_to=None, reducer='median'):
     """
     Get tile url for image collection asset.
     """
@@ -77,6 +77,12 @@ def get_image_collection_asset(platform, sensor, product, date_from=None, date_t
         if reducer:
             ee_collection = getattr(ee_collection, reducer)()
 
+        # Attempt to clip the image by the boundary provided by the user
+        clip_features = get_boundary_fc_for_user(request.user)
+
+        if clip_features:
+            ee_collection = ee_collection.clipToCollection(clip_features)
+
         tile_url = image_to_map_id(ee_collection, vis_params)
 
         return tile_url
@@ -86,7 +92,7 @@ def get_image_collection_asset(platform, sensor, product, date_from=None, date_t
 
 
 def get_time_series_from_image_collection(platform, sensor, product, index_name, scale=30, geometry=None,
-                                      date_from=None, date_to=None, reducer='median'):
+                                          date_from=None, date_to=None, reducer='median'):
     """
     Derive time series at given geometry.
     """
@@ -145,3 +151,135 @@ def get_time_series_from_image_collection(platform, sensor, product, index_name,
 
     log.debug(f'Time Series: {time_series}')
     return time_series
+
+
+def get_asset_dir_for_user(user):
+    """
+    Get a unique asset directory for given user.
+
+    Args:
+        user (django.contrib.auth.User): the request user.
+
+    Returns:
+        str: asset directory path for given user.
+    """
+    asset_roots = ee.batch.data.getAssetRoots()
+
+    if len(asset_roots) < 1:
+        raise FileNotFoundError('No asset root directory could be found. '
+                                'Please setup an asset root directory in the '
+                                'Google Earth Engine account associated with '
+                                'this app to use this feature.')
+
+    asset_root_dir = asset_roots[0]['id']
+    earth_engine_root_dir = os.path.join(asset_root_dir, 'earth_engine_app')
+    user_root_dir = os.path.join(earth_engine_root_dir, user.username)
+
+    # Create earth engine directory, will raise exception if it already exists
+    try:
+        ee.batch.data.createAsset({
+            'type': 'Folder',
+            'name': earth_engine_root_dir
+        })
+    except EEException as e:
+        if 'Cannot overwrite asset' not in str(e):
+            raise e
+
+    # Create user directory, will raise exception if it already exists
+    try:
+        ee.batch.data.createAsset({
+            'type': 'Folder',
+            'name': user_root_dir
+        })
+    except EEException as e:
+        if 'Cannot overwrite asset' not in str(e):
+            raise e
+
+    return user_root_dir
+
+
+def get_user_boundary_path(user):
+    """
+    Get a unique path for the user boundary asset.
+
+    Args:
+        user (django.contrib.auth.User): the request user.
+
+    Returns:
+        str: the unique path for the user boundary asset.
+    """
+    user_asset_dir = get_asset_dir_for_user(user)
+    user_boundary_asset_path = os.path.join(user_asset_dir, 'boundary')
+    return user_boundary_asset_path
+
+
+def upload_shapefile_to_gee(user, shp_file):
+    """
+    Upload a shapefile to Google Earth Engine as an asset.
+
+    Args:
+        user (django.contrib.auth.User): the request user.
+        shp_file (shapefile.Reader): A shapefile reader object.
+    """
+    features = []
+    fields = shp_file.fields[1:]
+    field_names = [field[0] for field in fields]
+
+    # Convert Shapefile to ee.Features
+    for record in shp_file.shapeRecords():
+        # First convert to geojson
+        attributes = dict(zip(field_names, record.record))
+        geojson_geom = record.shape.__geo_interface__
+        geojson_feature = {
+            'type': 'Feature',
+            'geometry': geojson_geom,
+            'properties': attributes
+        }
+
+        # Create ee.Feature from geojson (this is the Upload, b/c ee.Feature is a server object)
+        features.append(ee.Feature(geojson_feature))
+
+    feature_collection = ee.FeatureCollection(features)
+
+    # Get unique folder for each user to story boundary asset
+    user_boundary_asset_path = get_user_boundary_path(user)
+
+    # Overwrite an existing asset with this name by deleting it first
+    try:
+        ee.batch.data.deleteAsset(user_boundary_asset_path)
+    except EEException as e:
+        # Nothing to delete, so pass
+        if 'Asset not found' not in str(e):
+            raise e
+
+    # Export ee.Feature to ee.Asset
+    task = ee.batch.Export.table.toAsset(
+        collection=feature_collection,
+        description='uploadToTableAsset',
+        assetId=user_boundary_asset_path
+    )
+
+    task.start()
+
+
+def get_boundary_fc_for_user(user):
+    """
+    Get the boundary FeatureClass for the given user if it exists.
+
+    Args:
+        user (django.contrib.auth.User): the request user.
+
+    Returns:
+        ee.FeatureCollection: boundary feature collection or None
+    """
+    try:
+        boundary_path = get_user_boundary_path(user)
+        # If no boundary exists for the user, an exception occur when calling this and clipping will skipped
+        ee.batch.data.getAsset(boundary_path)
+        # Add the clip option
+        clip_features = ee.FeatureCollection(boundary_path)
+        return clip_features
+    except EEException:
+        pass
+
+    return None
