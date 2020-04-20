@@ -1,27 +1,16 @@
-import logging
 import datetime as dt
 import geojson
-from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import render
-from simplejson.errors import JSONDecodeError
+from simplejson import JSONDecodeError
 from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, PlotlyView, MVDraw
 from tethys_sdk.permissions import login_required
 from tethys_sdk.workspaces import user_workspace
-from .helpers import generate_figure, handle_shapefile_upload
-from .gee.methods import get_image_collection_asset, get_time_series_from_image_collection, \
-    get_boundary_fc_props_for_user
-from .gee.products import EE_PRODUCTS
-
-log = logging.getLogger(f'tethys.apps.{__name__}')
-
-
-@login_required()
-def home(request):
-    """
-    Controller for the app home page.
-    """
-    context = {}
-    return render(request, 'earth_engine/home.html', context)
+from tethysapp.earth_engine.controllers.home import log
+from tethysapp.earth_engine.gee.methods import get_boundary_fc_props_for_user, get_image_collection_asset, \
+    get_time_series_from_image_collection
+from tethysapp.earth_engine.gee.products import EE_PRODUCTS
+from tethysapp.earth_engine.helpers import handle_shapefile_upload, generate_figure
 
 
 @login_required()
@@ -337,8 +326,3 @@ def get_time_series_plot(request):
         log.exception('An unexpected error occurred.')
 
     return render(request, 'earth_engine/plot.html', context)
-
-
-def about(request):
-    context = {}
-    return render(request, 'earth_engine/about.html', context)

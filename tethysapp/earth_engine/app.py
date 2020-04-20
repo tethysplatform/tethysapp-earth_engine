@@ -28,27 +28,32 @@ class EarthEngine(TethysAppBase):
             UrlMap(
                 name='home',
                 url='earth-engine',
-                controller='earth_engine.controllers.home'
+                controller='earth_engine.controllers.home.home'
             ),
             UrlMap(
                 name='viewer',
                 url='earth-engine/viewer',
-                controller='earth_engine.controllers.viewer'
+                controller='earth_engine.controllers.viewer.viewer'
             ),
             UrlMap(
                 name='get_image_collection',
                 url='earth-engine/viewer/get-image-collection',
-                controller='earth_engine.controllers.get_image_collection'
+                controller='earth_engine.controllers.viewer.get_image_collection'
             ),
             UrlMap(
                 name='get_time_series_plot',
                 url='earth-engine/viewer/get-time-series-plot',
-                controller='earth_engine.controllers.get_time_series_plot'
+                controller='earth_engine.controllers.viewer.get_time_series_plot'
             ),
             UrlMap(
                 name='about',
                 url='earth-engine/about',
-                controller='earth_engine.controllers.about'
+                controller='earth_engine.controllers.home.about'
+            ),
+            UrlMap(
+                name='rest_get_time_series',
+                url='earth-engine/api/get-time-series',
+                controller='earth_engine.controllers.rest.get_time_series'
             )
         )
 
