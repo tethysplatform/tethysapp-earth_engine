@@ -1,3 +1,4 @@
+import logging
 import os
 import tempfile
 import zipfile
@@ -7,6 +8,8 @@ import ee
 import pandas as pd
 from plotly import graph_objs as go
 from .gee.methods import upload_shapefile_to_gee
+
+log = logging.getLogger(f'tethys.apps.{__name__}')
 
 
 def generate_figure(figure_title, time_series):
@@ -115,7 +118,9 @@ def handle_shapefile_upload(request, user_workspace):
             return 'Incomplete or corrupted shapefile provided.'
 
         except ee.EEException:
-            return 'An unexpected error occurred while uploading the shapefile to Google Earth Engine.'
+            msg = 'An unexpected error occurred while uploading the shapefile to Google Earth Engine.'
+            log.exception(msg)
+            return msg
 
 
 def find_shapefile(directory):

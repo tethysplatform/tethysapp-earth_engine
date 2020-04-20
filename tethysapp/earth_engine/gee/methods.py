@@ -5,18 +5,22 @@ import ee
 from ee.ee_exception import EEException
 import geojson
 import pandas as pd
-from . import params as gee_account
 from . import cloud_mask as cm
 from .products import EE_PRODUCTS
+from ..app import EarthEngine as app
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
 
-if gee_account.service_account:
+service_account = app.get_custom_setting('service_account_email')
+private_key_path = app.get_custom_setting('private_key_file')
+
+if service_account and private_key_path and os.path.isfile(private_key_path):
     try:
-        credentials = ee.ServiceAccountCredentials(gee_account.service_account, gee_account.private_key)
+        credentials = ee.ServiceAccountCredentials(service_account, private_key_path)
         ee.Initialize(credentials)
+        log.info('Successfully initialized GEE using service account.')
     except EEException as e:
-        print(str(e))
+        log.exception(str(e))
 else:
     try:
         ee.Initialize()
@@ -167,10 +171,8 @@ def get_asset_dir_for_user(user):
     asset_roots = ee.batch.data.getAssetRoots()
 
     if len(asset_roots) < 1:
-        raise FileNotFoundError('No asset root directory could be found. '
-                                'Please setup an asset root directory in the '
-                                'Google Earth Engine account associated with '
-                                'this app to use this feature.')
+        # Initialize the asset root directory if one doesn't exist already
+        ee.batch.data.createAssetHome('users/earth_engine_app')
 
     asset_root_dir = asset_roots[0]['id']
     earth_engine_root_dir = os.path.join(asset_root_dir, 'earth_engine_app')
@@ -251,6 +253,7 @@ def upload_shapefile_to_gee(user, shp_file):
     except EEException as e:
         # Nothing to delete, so pass
         if 'Asset not found' not in str(e):
+            log.exception('Encountered an unhandled EEException.')
             raise e
 
     # Export ee.Feature to ee.Asset
@@ -288,11 +291,12 @@ def get_boundary_fc_for_user(user):
 
 def get_boundary_fc_props_for_user(user):
     """
-
+    Get various properties of the boundary FeactureCollection.
     Args:
-        user:
+        user (django.contrib.auth.User): Get the properties of the boundary uploaded by this user.
 
     Returns:
+        dict<zoom,bbox,centroid>: Dictionary containing the centroid and bounding box of the boundary and the approximate OpenLayers zoom level to frame the boundary around the centroid. Empty dictionary if no boundary FeactureCollection is found for the given user.
     """
     fc = get_boundary_fc_for_user(user)
 
@@ -318,3 +322,4 @@ def get_boundary_fc_props_for_user(user):
     }
 
     return fc_props
+
