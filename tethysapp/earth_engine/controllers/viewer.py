@@ -1,4 +1,3 @@
-import datetime as dt
 import geojson
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import render
@@ -10,7 +9,7 @@ from tethysapp.earth_engine.controllers.home import log
 from tethysapp.earth_engine.gee.methods import get_boundary_fc_props_for_user, get_image_collection_asset, \
     get_time_series_from_image_collection
 from tethysapp.earth_engine.gee.products import EE_PRODUCTS
-from tethysapp.earth_engine.helpers import handle_shapefile_upload, generate_figure
+from tethysapp.earth_engine.helpers import handle_shapefile_upload, generate_figure, compute_dates_for_product
 
 
 @login_required()
@@ -60,19 +59,8 @@ def viewer(request, user_workspace):
         options=product_options
     )
 
-    # Hardcode initial end date to today (since all of our datasets extend to present)
-    today = dt.datetime.today()
-    initial_end_date = today.strftime('%Y-%m-%d')
-
-    # Initial start date will a set number of days before the end date
-    # NOTE: This assumes the start date of the dataset is at least 30+ days prior to today
-    initial_end_date_dt = dt.datetime.strptime(initial_end_date, '%Y-%m-%d')
-    initial_start_date_dt = initial_end_date_dt - dt.timedelta(days=30)
-    initial_start_date = initial_start_date_dt.strftime('%Y-%m-%d')
-
-    # Build date controls
-    first_product_start_date = first_product.get('start_date', None)
-    first_product_end_date = first_product.get('end_date', None) or initial_end_date
+    # Get initial default dates and date ranges for date picker controls
+    first_product_dates = compute_dates_for_product(first_product)
 
     start_date = DatePicker(
         name='start_date',
@@ -81,9 +69,9 @@ def viewer(request, user_workspace):
         start_view='decade',
         today_button=True,
         today_highlight=True,
-        start_date=first_product_start_date,
-        end_date=first_product_end_date,
-        initial=initial_start_date,
+        start_date=first_product_dates['beg_valid_date_range'],
+        end_date=first_product_dates['end_valid_date_range'],
+        initial=first_product_dates['default_start_date'],
         autoclose=True
     )
 
@@ -94,9 +82,9 @@ def viewer(request, user_workspace):
         start_view='decade',
         today_button=True,
         today_highlight=True,
-        start_date=first_product_start_date,
-        end_date=first_product_end_date,
-        initial=initial_end_date,
+        start_date=first_product_dates['beg_valid_date_range'],
+        end_date=first_product_dates['end_valid_date_range'],
+        initial=first_product_dates['default_end_date'],
         autoclose=True
     )
 

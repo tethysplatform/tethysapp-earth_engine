@@ -1,3 +1,4 @@
+import datetime as dt
 import logging
 import os
 import tempfile
@@ -202,3 +203,37 @@ def prep_boundary_dir(root_path):
             os.remove(f)
 
     return boundary_dir
+
+
+def compute_dates_for_product(product_dict):
+    """
+    Compute default dates and date range for given product.
+
+    Args:
+        product_dict (dict): The product dictionary from EE_PRODUCTS
+
+    Returns:
+        dict<default_start_date,default_end_date,beg_valid_date_range,end_valid_date_range>: dict with date strings formatted: %Y-%m-%d.
+    """
+    # Hardcode initial end date to today (since all of our datasets extend to present)
+    today = dt.datetime.today()
+    default_end_date = today.strftime('%Y-%m-%d')
+
+    # Initial start date will a set number of days before the end date
+    # NOTE: This assumes the start date of the dataset is at least 30+ days prior to today
+    default_end_date_dt = dt.datetime.strptime(default_end_date, '%Y-%m-%d')
+    default_start_date_dt = default_end_date_dt - dt.timedelta(days=30)
+    default_start_date = default_start_date_dt.strftime('%Y-%m-%d')
+
+    # Get valid date range for product
+    beg_valid_date_range = product_dict.get('start_date', None)
+    end_valid_date_range = product_dict.get('end_date', None) or default_end_date
+
+    product_dates = {
+        'default_start_date': default_start_date,
+        'default_end_date': default_end_date,
+        'beg_valid_date_range': beg_valid_date_range,
+        'end_valid_date_range': end_valid_date_range
+    }
+
+    return product_dates
