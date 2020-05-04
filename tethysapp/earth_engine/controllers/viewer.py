@@ -1,4 +1,10 @@
+import os
+import tempfile
+import zipfile
+import logging
+import ee
 import geojson
+import shapefile
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import render
 from simplejson import JSONDecodeError
@@ -7,9 +13,12 @@ from tethys_sdk.permissions import login_required
 from tethys_sdk.workspaces import user_workspace
 from tethysapp.earth_engine.controllers.home import log
 from tethysapp.earth_engine.gee.methods import get_boundary_fc_props_for_user, get_image_collection_asset, \
-    get_time_series_from_image_collection
+    get_time_series_from_image_collection, upload_shapefile_to_gee
 from tethysapp.earth_engine.gee.products import EE_PRODUCTS
-from tethysapp.earth_engine.helpers import handle_shapefile_upload, generate_figure, compute_dates_for_product
+from tethysapp.earth_engine.helpers import generate_figure, compute_dates_for_product, find_shapefile, \
+    prep_boundary_dir, write_boundary_shapefile
+
+log = logging.getLogger(f'tethys.apps.{__name__}')
 
 
 @login_required()
@@ -314,3 +323,65 @@ def get_time_series_plot(request):
         log.exception('An unexpected error occurred.')
 
     return render(request, 'earth_engine/plot.html', context)
+
+
+def handle_shapefile_upload(request, user_workspace):
+    """
+    Uploads shapefile to Google Earth Engine as an Asset.
+
+    Args:
+        request (django.Request): the request object.
+        user_workspace (tethys_sdk.workspaces.Workspace): the User workspace object.
+
+    Returns:
+        str: Error string if errors occurred.
+    """
+    # Write file to temp for processing
+    uploaded_file = request.FILES['boundary-file']
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_zip_path = os.path.join(temp_dir, 'boundary.zip')
+
+        # Use with statements to ensure opened files are closed when done
+        with open(temp_zip_path, 'wb') as temp_zip:
+            for chunk in uploaded_file.chunks():
+                temp_zip.write(chunk)
+
+        try:
+            # Extract the archive to the temporary directory
+            with zipfile.ZipFile(temp_zip_path) as temp_zip:
+                temp_zip.extractall(temp_dir)
+
+        except zipfile.BadZipFile:
+            # Return error message
+            return 'You must provide a zip archive containing a shapefile.'
+
+        # Verify that it contains a shapefile
+        try:
+            # Find a shapefile in directory where we extracted the archive
+            shapefile_path = find_shapefile(temp_dir)
+
+            if not shapefile_path:
+                return 'No Shapefile found in the archive provided.'
+
+            with shapefile.Reader(shapefile_path) as shp_file:
+                # Check type (only Polygon supported)
+                if shp_file.shapeType != shapefile.POLYGON:
+                    return 'Only shapefiles containing Polygons are supported.'
+
+                # Setup workspace directory for storing shapefile
+                workspace_dir = prep_boundary_dir(user_workspace.path)
+
+                # Write the shapefile to the workspace directory
+                write_boundary_shapefile(shp_file, workspace_dir)
+
+                # Upload shapefile as Asset in GEE
+                upload_shapefile_to_gee(request.user, shp_file)
+
+        except TypeError:
+            return 'Incomplete or corrupted shapefile provided.'
+
+        except ee.EEException:
+            msg = 'An unexpected error occurred while uploading the shapefile to Google Earth Engine.'
+            log.exception(msg)
+            return msg
