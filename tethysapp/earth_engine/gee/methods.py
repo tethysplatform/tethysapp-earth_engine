@@ -295,12 +295,12 @@ def get_boundary_fc_for_user(user):
 
 def get_boundary_fc_props_for_user(user):
     """
-    Get various properties of the boundary FeactureCollection.
+    Get various properties of the boundary FeatureCollection.
     Args:
         user (django.contrib.auth.User): Get the properties of the boundary uploaded by this user.
 
     Returns:
-        dict<zoom,bbox,centroid>: Dictionary containing the centroid and bounding box of the boundary and the approximate OpenLayers zoom level to frame the boundary around the centroid. Empty dictionary if no boundary FeactureCollection is found for the given user.
+        dict<zoom,bbox,centroid>: Dictionary containing the centroid and bounding box of the boundary and the approximate OpenLayers zoom level to frame the boundary around the centroid. Empty dictionary if no boundary FeatureCollection is found for the given user.
     """
     fc = get_boundary_fc_for_user(user)
 
@@ -310,15 +310,21 @@ def get_boundary_fc_props_for_user(user):
     # Compute bounding box
     bounding_rect = fc.geometry().bounds().getInfo()
     bounding_coords = bounding_rect.get('coordinates')[0]
+
+    # Derive bounding box from two corners of the bounding rectangle
     bbox = [bounding_coords[0][0], bounding_coords[0][1], bounding_coords[2][0], bounding_coords[2][1]]
 
     # Get centroid
     centroid = fc.geometry().centroid().getInfo()
 
-    # Compute length diagonal of bbox for zoom calulation
+    # Compute length diagonal of bbox for zoom calculation
     diag = math.sqrt((bbox[0] - bbox[2])**2 + (bbox[1] - bbox[3])**2)
+
+    # Found the diagonal length and zoom level for US and Kenya boundaries
+    # Used equation of a line to develop the relationship between zoom and diagonal of bounding box
     zoom = round((-0.0701 * diag) + 8.34, 0)
 
+    # The returned ee.FeatureClass properties
     fc_props = {
         'zoom': zoom,
         'bbox': bbox,

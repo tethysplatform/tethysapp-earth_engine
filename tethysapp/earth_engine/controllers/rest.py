@@ -12,7 +12,7 @@ from tethysapp.earth_engine.helpers import compute_dates_for_product
 log = logging.getLogger(f'tethys.apps.{__name__}')
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,))
 def get_time_series(request):
     """
