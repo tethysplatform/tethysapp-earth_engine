@@ -14,6 +14,10 @@ def home(request):
     return render(request, 'earth_engine/home.html', context)
 
 
+@login_required()
 def about(request):
+    """
+    Controller for the app about page.
+    """
     context = {}
     return render(request, 'earth_engine/about.html', context)
