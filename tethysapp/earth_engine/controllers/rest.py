@@ -51,13 +51,25 @@ def get_time_series(request):
                                       f'platform include: "{valid_sensor_str}".')
 
     # product
-    if not product:
+    if not product or product not in EE_PRODUCTS[platform][sensor]:
         valid_product_str = '", "'.join(EE_PRODUCTS[platform][sensor].keys())
         return HttpResponseBadRequest(f'The "product" parameter is required. Valid products for the "{platform} '
                                       f'{sensor}" sensor include: "{valid_product_str}".')
 
-    # compute dates for given product
     selected_product = EE_PRODUCTS[platform][sensor][product]
+
+    # index
+    # if index not provided, get default index from product properties
+    if not index:
+        index = selected_product['index']
+
+    # if index is still None (not defined for the product) it is not supported currently
+    if index is None:
+        return HttpResponseBadRequest(
+            f'Retrieving time series for "{platform} {sensor} {product}" is not supported at this time.'
+        )
+
+    # Get valid dates for selected product
     product_dates = compute_dates_for_product(selected_product)
 
     # assign default start date if not provided
@@ -123,17 +135,6 @@ def get_time_series(request):
     except ValueError:
         return HttpResponseBadRequest(
             f'The "scale" parameter must be a valid number, but "{scale_str}" was given.'
-        )
-
-    # index
-    # if index not provided, get default index from product properties
-    if not index:
-        index = selected_product['index']
-
-    # if index is still None (not defined for the product) it is not supported currently
-    if index is None:
-        return HttpResponseBadRequest(
-            f'Retrieving time series for "{platform} {sensor} {product}" is not supported at this time.'
         )
 
     # geometry

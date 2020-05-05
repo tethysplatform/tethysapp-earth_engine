@@ -11,11 +11,10 @@ from simplejson import JSONDecodeError
 from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, PlotlyView, MVDraw
 from tethys_sdk.permissions import login_required
 from tethys_sdk.workspaces import user_workspace
-from tethysapp.earth_engine.controllers.home import log
-from tethysapp.earth_engine.gee.methods import get_boundary_fc_props_for_user, get_image_collection_asset, \
+from ..gee.methods import get_boundary_fc_props_for_user, get_image_collection_asset, \
     get_time_series_from_image_collection, upload_shapefile_to_gee
-from tethysapp.earth_engine.gee.products import EE_PRODUCTS
-from tethysapp.earth_engine.helpers import generate_figure, compute_dates_for_product, find_shapefile, \
+from ..gee.products import EE_PRODUCTS
+from ..helpers import generate_figure, compute_dates_for_product, find_shapefile, \
     prep_boundary_dir, write_boundary_shapefile
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
