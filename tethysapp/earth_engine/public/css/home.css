@@ -1,0 +1,72 @@
+.info-container {
+  background-color: #0000009f;
+  box-shadow: 3px 5px 3px rgba(0,0,0,0.35);
+  padding: 10px;
+  margin-bottom: 30px;
+}
+
+.info-container .info-title {
+  color: #067ef5;
+  text-shadow: 2px 2px #000000;
+}
+
+.info-container p {
+  color: #eee;
+  text-shadow: 2px 2px #000000;
+  font-size: 16px;
+}
+
+.info-container .media-body {
+  color: #eee;
+  text-shadow: 2px 2px #000000;
+}
+
+.info-container .media-object {
+  border-radius: 5px;
+}
+
+.info-container .media-heading {
+  color: #eee;
+  text-shadow: 2px 2px #000000;
+}
+
+#feature-image {
+  width: 100%;
+}
+
+#get-started-btn {
+  display: inline-block;
+  border-radius: 15px;
+  padding: 5px 10px;
+  background-color: #fff;
+  color: #044777;
+  border: solid 2px rgb(6, 126, 245);
+  text-transform: uppercase;
+  font-weight: 600;
+  align-items: center;
+  font-size: 14pt;
+  cursor: pointer;
+  width: fit-content;
+  text-decoration: none !important;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+#get-started-btn:hover {
+  background-color: #eee;
+}
+
+#get-started-btn:active,
+#get-started-btn:focus {
+  background-color: #044777;
+  color: white;
+}
+
+#home-content-container {
+  padding: 20px;
+  min-height: 100%;
+  background: url('/static/earth_engine/images/earth-engine-backdrop.png');
+  background-color: #d2dadc;
+  background-position: center;
+  background-repeat: no-repeat
+}

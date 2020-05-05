@@ -30,13 +30,18 @@ class EarthEngine(TethysAppBase):
                 controller='earth_engine.controllers.home'
             ),
             UrlMap(
+                name='viewer',
+                url='earth-engine/viewer',
+                controller='earth_engine.controllers.viewer'
+            ),
+            UrlMap(
                 name='get_image_collection',
-                url='earth-engine/get-image-collection',
+                url='earth-engine/viewer/get-image-collection',
                 controller='earth_engine.controllers.get_image_collection'
             ),
             UrlMap(
                 name='get_time_series_plot',
-                url='earth-engine/get-time-series-plot',
+                url='earth-engine/viewer/get-time-series-plot',
                 controller='earth_engine.controllers.get_time_series_plot'
             ),
         )
