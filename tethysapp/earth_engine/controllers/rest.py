@@ -18,16 +18,24 @@ def get_time_series(request):
     """
     Controller for the app home page.
     """
-    platform = request.GET.get('platform', None)
-    sensor = request.GET.get('sensor', None)
-    product = request.GET.get('product', None)
-    start_date_str = request.GET.get('start_date', None)
-    end_date_str = request.GET.get('end_date', None)
-    reducer = request.GET.get('reducer', 'median')
-    index = request.GET.get('index', None)
-    scale_str = request.GET.get('scale', 250)
-    orient = request.GET.get('orient', 'list')
-    geometry_str = request.GET.get('geometry', None)
+    # Get request parameters.
+    if request.method == 'GET':
+        data = request.GET.copy()
+    elif request.method == 'POST':
+        data = request.POST.copy()
+    else:
+        return HttpResponseBadRequest('Only GET and POST methods are supported.')
+
+    platform = data.get('platform', None)
+    sensor = data.get('sensor', None)
+    product = data.get('product', None)
+    start_date_str = data.get('start_date', None)
+    end_date_str = data.get('end_date', None)
+    reducer = data.get('reducer', 'median')
+    index = data.get('index', None)
+    scale_str = data.get('scale', 250)
+    orient = data.get('orient', 'list')
+    geometry_str = data.get('geometry', None)
 
     # validate given parameters
     # platform
