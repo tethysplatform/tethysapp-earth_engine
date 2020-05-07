@@ -1,0 +1,57 @@
+{% extends "earth_engine/base.html" %}
+{% load static %}
+
+{% block styles %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'earth_engine/css/no_nav.css' %}" />
+  <link rel="stylesheet" href="{% static 'earth_engine/css/about.css' %}" />
+{% endblock %}
+
+{% block app_navigation_override %}
+{% endblock %}
+
+{% block app_content %}
+  <div class="container">
+    <div class="page-header">
+      <h1>About Earth Engine</h1>
+      <h1><small>Sit Amet Consectetur Adipiscing</small></h1>
+    </div>
+    <div class="row">
+      <!-- Left Column -->
+      <div class="col-md-8">
+        <div class="about-content">
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Euismod nisi porta lorem mollis. Congue quisque egestas diam in arcu cursus euismod. Auctor neque vitae tempus quam pellentesque nec nam. Erat imperdiet sed euismod nisi porta lorem. Nunc eget lorem dolor sed viverra ipsum nunc aliquet bibendum. Sed blandit libero volutpat sed cras ornare. Convallis tellus id interdum velit laoreet id. Amet mauris commodo quis imperdiet massa tincidunt. Mi bibendum neque egestas congue quisque egestas diam in. Enim nec dui nunc mattis enim ut tellus elementum sagittis. Cursus mattis molestie a iaculis at erat pellentesque. Ut tellus elementum sagittis vitae et leo.</p>
+          <h6>Eu Consequat ac Felis</h6>
+          <p>Eu consequat ac felis donec et odio. Eget arcu dictum varius duis at consectetur lorem. Lorem ipsum dolor sit amet consectetur. Turpis egestas integer eget aliquet nibh praesent. Mattis rhoncus urna neque viverra justo nec. Iaculis urna id volutpat lacus laoreet non curabitur gravida arcu. Convallis posuere morbi leo urna molestie at elementum eu. Fermentum et sollicitudin ac orci phasellus egestas tellus. Convallis aenean et tortor at risus. Morbi tristique senectus et netus et malesuada fames ac. Sed vulputate mi sit amet mauris commodo quis. Nisi quis eleifend quam adipiscing vitae proin sagittis nisl. Id venenatis a condimentum vitae sapien pellentesque habitant morbi tristique. Id cursus metus aliquam eleifend mi in nulla. Proin fermentum leo vel orci porta non pulvinar neque laoreet. Lobortis mattis aliquam faucibus purus in massa tempor. Varius vel pharetra vel turpis nunc.</p>
+          <p><b>Mauris rhoncus aenean vel elit:</b> Blandit aliquam etiam erat velit. Auctor neque vitae tempus quam pellentesque nec nam. Augue mauris augue neque gravida in fermentum et. Tempus urna et pharetra pharetra. Vel turpis nunc eget lorem. Vitae nunc sed velit dignissim. Enim tortor at auctor urna nunc id. Pellentesque habitant morbi tristique senectus et netus et. Tellus integer feugiat scelerisque varius morbi enim nunc faucibus.</p>
+          <p><b>Blandit turpis cursus in hac habitasse platea:</b> Tellus elementum sagittis vitae et leo duis ut diam quam. Amet nisl purus in mollis nunc sed. Ac feugiat sed lectus vestibulum. Suscipit adipiscing bibendum est ultricies integer quis. Tortor pretium viverra suspendisse potenti nullam ac tortor. Blandit turpis cursus in hac. Id porta nibh venenatis cras sed felis eget velit. Fermentum posuere urna nec tincidunt praesent semper feugiat nibh sed. Pellentesque elit ullamcorper dignissim cras tincidunt lobortis feugiat vivamus at. Sapien et ligula ullamcorper malesuada proin libero nunc consequat. Aliquet enim tortor at auctor urna nunc id. Fringilla ut morbi tincidunt augue interdum velit euismod in. In arcu cursus euismod quis viverra nibh. Vulputate ut pharetra sit amet. Purus in massa tempor nec. Pellentesque massa placerat duis ultricies lacus sed. Integer feugiat scelerisque varius morbi enim. Vitae tempus quam pellentesque nec nam.</p>
+          <p><b>Sed cras ornare arcu dui vivamus arcu:</b> Pellentesque adipiscing commodo elit at. Fusce id velit ut tortor pretium viverra. Nunc vel risus commodo viverra. Dui faucibus in ornare quam viverra orci sagittis eu volutpat. Aliquet nibh praesent tristique magna. Purus sit amet volutpat consequat. Gravida neque convallis a cras. Aenean euismod elementum nisi quis eleifend. At tellus at urna condimentum mattis pellentesque id nibh tortor. Sit amet massa vitae tortor. Volutpat lacus laoreet non curabitur gravida arcu ac. Vulputate dignissim suspendisse in est ante. Tempor commodo ullamcorper a lacus vestibulum. Quis vel eros donec ac odio tempor. Lacus sed turpis tincidunt id aliquet risus feugiat in ante. Metus aliquam eleifend mi in.</p>'
+        </div>
+      </div>
+      <!-- End Left Column -->
+      <!-- Right Column -->
+      <div class="col-md-4">
+        <div class="about-imgs">
+          <img class="about-img" src="http://placeimg.com/360/200/nature">
+          <img class="about-img" src="http://placeimg.com/360/250/nature">
+          <img class="about-img" src="http://placeimg.com/360/300/nature">
+        </div>
+      </div>
+      <!-- End Right Column -->
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="about-footer-content">
+          <h3>Sponsors</h3>
+          <img src="https://via.placeholder.com/50/0000ff/000000?text=1">
+          <img src="https://via.placeholder.com/50/00ff00/000000?text=2">
+          <img src="https://via.placeholder.com/50/ff0000/000000?text=3">
+          <img src="https://via.placeholder.com/50/00ffff/000000?text=4">
+          <img src="https://via.placeholder.com/50/ffff00/000000?text=5">
+          <img src="https://via.placeholder.com/50/ff8800/000000?text=6">
+          <img src="https://via.placeholder.com/50/8800ff/000000?text=7">
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

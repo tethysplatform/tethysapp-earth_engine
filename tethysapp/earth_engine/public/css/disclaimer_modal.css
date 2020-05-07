@@ -1,0 +1,20 @@
+#disclaimer-container {
+  height: 400px;
+  overflow-y: auto;
+}
+
+#sponsors-container {
+  text-align: left;
+}
+
+#sponsors-container img {
+  height: 50px;
+  width: 50px;
+  margin-right: 10px;
+  border-radius: 5px;
+}
+
+#sponsors-container h6 {
+    display: inline-block;
+    margin-right: 10px;
+}

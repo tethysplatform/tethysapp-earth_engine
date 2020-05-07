@@ -23,6 +23,15 @@ def home(request):
 
 
 @login_required()
+def about(request):
+    """
+    Controller for the app about page.
+    """
+    context = {}
+    return render(request, 'earth_engine/about.html', context)
+
+
+@login_required()
 def viewer(request):
     """
     Controller for the app viewer page.
