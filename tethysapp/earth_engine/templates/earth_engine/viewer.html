@@ -25,6 +25,8 @@
   {% gizmo clear_button %}
   <p class="help">Draw an area of interest or drop a point, the press "Plot AOI" to view a plot of the data.</p>
   {% gizmo plot_button %}
+  <p class="help">Upload a shapefile of a boundary to use to clip datasets and set the default extent.</p>
+  {% gizmo set_boundary_button %}
 {% endblock %}
 
 {% block app_content %}
@@ -49,6 +51,36 @@
     </div>
   </div>
   <!-- End Plot Modal -->
+  <!-- Set Boundary Modal -->
+  <div class="modal fade" id="set-boundary-modal" tabindex="-1" role="dialog" aria-labelledby="set-boundary-modal-label">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h5 class="modal-title" id="set-boundary-modal-label">Set Boundary</h5>
+        </div>
+        <div class="modal-body">
+          <form class="horizontal-form" id="set-boundary-form" method="post" action="" enctype="multipart/form-data">
+            <p>Create a zip archive containing a shapefile and supporting files (i.e.: .shp, .shx, .dbf). Then use the file browser button below to select it.</p>
+            <!-- This is required for POST method -->
+            {% csrf_token %}
+            <div id="boundary-file-form-group" class="form-group{% if set_boundary_error %} has-error{% endif %}">
+              <label class="control-label" for="boundary-file">Boundary Shapefile</label>
+              <input type="file" name="boundary-file" id="boundary-file" accept="zip">
+              {% if set_boundary_error %}
+              <p class="help-block">{{ set_boundary_error }}</p>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <input type="submit" class="btn btn-default" value="Set Boundary" name="set-boundary-submit" id="set-boundary-submit" form="set-boundary-form">
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End Set Boundary Modal -->
   <div id="ee-products" data-ee-products="{{ ee_products|jsonify }}"></div>
   <div id="loader">
     <img src="{% static 'earth_engine/images/map-loader.gif' %}">

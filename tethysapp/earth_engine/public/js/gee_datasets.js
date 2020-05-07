@@ -309,7 +309,7 @@ var GEE_DATASETS = (function() {
     *************************************************************************/
     public_interface = {};
 
-    /************************************************************************
+   /************************************************************************
     *                  INITIALIZATION / CONSTRUCTOR
     *************************************************************************/
     $(function() {
@@ -328,6 +328,11 @@ var GEE_DATASETS = (function() {
         m_reducer = $('#reducer').val();
 
         m_map = TETHYS_MAP_VIEW.getMap();
+
+        // Open boundary file modal if it has an error
+        if ($('#boundary-file-form-group').hasClass('has-error')) {
+            $('#set-boundary-modal').modal('show');
+        }
     });
 
     return public_interface;

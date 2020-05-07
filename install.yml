@@ -13,6 +13,7 @@ requirements:
       - earthengine-api
       - oauth2client
       - geojson
+      - pyshp
   pip:
 
 post:
