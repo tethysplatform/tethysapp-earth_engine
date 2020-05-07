@@ -4,6 +4,7 @@ import zipfile
 import logging
 import datetime as dt
 import geojson
+import ee
 import shapefile
 from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import render
@@ -12,7 +13,8 @@ from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, 
 from tethys_sdk.permissions import login_required
 from tethys_sdk.workspaces import user_workspace
 from .helpers import generate_figure, find_shapefile, write_boundary_shapefile, prep_boundary_dir
-from .gee.methods import get_image_collection_asset, get_time_series_from_image_collection
+from .gee.methods import get_image_collection_asset, get_time_series_from_image_collection, upload_shapefile_to_gee, \
+    get_boundary_fc_props_for_user
 from .gee.products import EE_PRODUCTS
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
@@ -162,6 +164,9 @@ def viewer(request, user_workspace):
         attributes={'id': 'load_plot'}
     )
 
+    # Get bounding box from user boundary if it exists
+    boundary_props = get_boundary_fc_props_for_user(request.user)
+
     map_view = MapView(
         height='100%',
         width='100%',
@@ -169,7 +174,7 @@ def viewer(request, user_workspace):
             'ZoomSlider', 'Rotate', 'FullScreen',
             {'ZoomToExtent': {
                 'projection': 'EPSG:4326',
-                'extent': [29.25, -4.75, 46.25, 5.2]
+                'extent': boundary_props.get('bbox', [-180, -90, 180, 90])  # Default to World
             }}
         ],
         basemap=[
@@ -181,8 +186,8 @@ def viewer(request, user_workspace):
         ],
         view=MVView(
             projection='EPSG:4326',
-            center=[37.880859, 0.219726],
-            zoom=7,
+            center=boundary_props.get('centroid', [0, 0]),  # Default to World
+            zoom=boundary_props.get('zoom', 3),  # Default to World
             maxZoom=18,
             minZoom=2
         ),
@@ -254,6 +259,7 @@ def get_image_collection(request):
         reducer = request.POST.get('reducer', None)
 
         url = get_image_collection_asset(
+            request=request,
             platform=platform,
             sensor=sensor,
             product=product,
@@ -397,5 +403,13 @@ def handle_shapefile_upload(request, user_workspace):
                 # Write the shapefile to the workspace directory
                 write_boundary_shapefile(shp_file, workspace_dir)
 
+                # Upload shapefile as Asset in GEE
+                upload_shapefile_to_gee(request.user, shp_file)
+
         except TypeError:
             return 'Incomplete or corrupted shapefile provided.'
+
+        except ee.EEException:
+            msg = 'An unexpected error occurred while uploading the shapefile to Google Earth Engine.'
+            log.exception(msg)
+            return msg
