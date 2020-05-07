@@ -12,30 +12,13 @@ from simplejson.errors import JSONDecodeError
 from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, PlotlyView, MVDraw
 from tethys_sdk.permissions import login_required
 from tethys_sdk.workspaces import user_workspace
-from .helpers import generate_figure, find_shapefile, write_boundary_shapefile, prep_boundary_dir
-from .gee.methods import get_image_collection_asset, get_time_series_from_image_collection, upload_shapefile_to_gee, \
+from ..helpers import generate_figure, find_shapefile, write_boundary_shapefile, prep_boundary_dir, \
+    compute_dates_for_product
+from ..gee.methods import get_image_collection_asset, get_time_series_from_image_collection, upload_shapefile_to_gee, \
     get_boundary_fc_props_for_user
-from .gee.products import EE_PRODUCTS
+from ..gee.products import EE_PRODUCTS
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
-
-
-@login_required()
-def home(request):
-    """
-    Controller for the app home page.
-    """
-    context = {}
-    return render(request, 'earth_engine/home.html', context)
-
-
-@login_required()
-def about(request):
-    """
-    Controller for the app about page.
-    """
-    context = {}
-    return render(request, 'earth_engine/about.html', context)
 
 
 @login_required()
@@ -85,19 +68,8 @@ def viewer(request, user_workspace):
         options=product_options
     )
 
-    # Hardcode initial end date to today (since all of our datasets extend to present)
-    today = dt.datetime.today()
-    initial_end_date = today.strftime('%Y-%m-%d')
-
-    # Initial start date will a set number of days before the end date
-    # NOTE: This assumes the start date of the dataset is at least 30+ days prior to today
-    initial_end_date_dt = dt.datetime.strptime(initial_end_date, '%Y-%m-%d')
-    initial_start_date_dt = initial_end_date_dt - dt.timedelta(days=30)
-    initial_start_date = initial_start_date_dt.strftime('%Y-%m-%d')
-
-    # Build date controls
-    first_product_start_date = first_product.get('start_date', None)
-    first_product_end_date = first_product.get('end_date', None) or initial_end_date
+    # Get initial default dates and date ranges for date picker controls
+    first_product_dates = compute_dates_for_product(first_product)
 
     start_date = DatePicker(
         name='start_date',
@@ -106,9 +78,9 @@ def viewer(request, user_workspace):
         start_view='decade',
         today_button=True,
         today_highlight=True,
-        start_date=first_product_start_date,
-        end_date=first_product_end_date,
-        initial=initial_start_date,
+        start_date=first_product_dates['beg_valid_date_range'],
+        end_date=first_product_dates['end_valid_date_range'],
+        initial=first_product_dates['default_start_date'],
         autoclose=True
     )
 
@@ -119,9 +91,9 @@ def viewer(request, user_workspace):
         start_view='decade',
         today_button=True,
         today_highlight=True,
-        start_date=first_product_start_date,
-        end_date=first_product_end_date,
-        initial=initial_end_date,
+        start_date=first_product_dates['beg_valid_date_range'],
+        end_date=first_product_dates['end_valid_date_range'],
+        initial=first_product_dates['default_end_date'],
         autoclose=True
     )
 

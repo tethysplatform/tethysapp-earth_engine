@@ -94,7 +94,7 @@ def get_image_collection_asset(request, platform, sensor, product, date_from=Non
 
 
 def get_time_series_from_image_collection(platform, sensor, product, index_name, scale=30, geometry=None,
-                                      date_from=None, date_to=None, reducer='median'):
+                                          date_from=None, date_to=None, reducer='median', orient='df'):
     """
     Derive time series at given geometry.
     """
@@ -103,7 +103,7 @@ def get_time_series_from_image_collection(platform, sensor, product, index_name,
     collection_name = ee_product['collection']
 
     if not isinstance(geometry, geojson.GeometryCollection):
-        raise ValueError('Geometry must be a valid geojson.GeometryCollection')
+        raise ValueError('Geometry must be a valid GeoJSON GeometryCollection.')
 
     for geom in geometry.geometries:
         log.debug(f'Computing Time Series for Geometry of Type: {geom.type}')
@@ -146,7 +146,11 @@ def get_time_series_from_image_collection(platform, sensor, product, index_name,
             values = index_collection_agg.getInfo()
             log.debug('Values acquired.')
             df = pd.DataFrame(values, columns=['Time', index_name.replace("_", " ")])
-            time_series.append(df)
+
+            if orient == 'df':
+                time_series.append(df)
+            else:
+                time_series.append(df.to_dict(orient=orient))
 
         except EEException:
             log.exception('An error occurred while attempting to retrieve the time series.')
