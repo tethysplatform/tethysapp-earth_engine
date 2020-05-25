@@ -12,17 +12,18 @@ dependencies = []
 resource_files = find_resource_files('tethysapp/' + app_package + '/templates', 'tethysapp/' + app_package)
 resource_files += find_resource_files('tethysapp/' + app_package + '/public', 'tethysapp/' + app_package)
 
+with open('README.md', 'r') as f:
+    long_description = f.read()
 
 setup(
     name=release_package,
-    version='0.0.1',
-    description='',
-    long_description='',
-    keywords='',
-    author='',
-    author_email='',
-    url='',
-    license='',
+    version='1.0.0',
+    description='A Google Earth Engine demonstration Tethys App.',
+    long_description=long_description,
+    author='Nathan Swain',
+    author_email='nswain@aquaveo.com',
+    url='',  # The URL will be set in a future step.
+    license='BSD 3-Clause',
     packages=find_namespace_packages(),
     package_data={'': resource_files},
     include_package_data=True,
