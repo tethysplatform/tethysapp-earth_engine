@@ -1,8 +1,15 @@
 import os
+import logging
 import glob
-import shapefile
+import tempfile
+import zipfile
+import ee
 import pandas as pd
 from plotly import graph_objs as go
+import shapefile
+from .gee.methods import upload_shapefile_to_gee
+
+log = logging.getLogger(f'tethys.apps.{__name__}')
 
 
 def generate_figure(figure_title, time_series):
@@ -52,6 +59,68 @@ def generate_figure(figure_title, time_series):
     }
 
     return figure
+
+
+def handle_shapefile_upload(request, user_workspace):
+    """
+    Uploads shapefile to Google Earth Engine as an Asset.
+
+    Args:
+        request (django.Request): the request object.
+        user_workspace (tethys_sdk.workspaces.Workspace): the User workspace object.
+
+    Returns:
+        str: Error string if errors occurred.
+    """
+    # Write file to temp for processing
+    uploaded_file = request.FILES['boundary-file']
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_zip_path = os.path.join(temp_dir, 'boundary.zip')
+
+        # Use with statements to ensure opened files are closed when done
+        with open(temp_zip_path, 'wb') as temp_zip:
+            for chunk in uploaded_file.chunks():
+                temp_zip.write(chunk)
+
+        try:
+            # Extract the archive to the temporary directory
+            with zipfile.ZipFile(temp_zip_path) as temp_zip:
+                temp_zip.extractall(temp_dir)
+
+        except zipfile.BadZipFile:
+            # Return error message
+            return 'You must provide a zip archive containing a shapefile.'
+
+        # Verify that it contains a shapefile
+        try:
+            # Find a shapefile in directory where we extracted the archive
+            shapefile_path = find_shapefile(temp_dir)
+
+            if not shapefile_path:
+                return 'No Shapefile found in the archive provided.'
+
+            with shapefile.Reader(shapefile_path) as shp_file:
+                # Check type (only Polygon supported)
+                if shp_file.shapeType != shapefile.POLYGON:
+                    return 'Only shapefiles containing Polygons are supported.'
+
+                # Setup workspace directory for storing shapefile
+                workspace_dir = prep_boundary_dir(user_workspace.path)
+
+                # Write the shapefile to the workspace directory
+                write_boundary_shapefile(shp_file, workspace_dir)
+
+                # Upload shapefile as Asset in GEE
+                upload_shapefile_to_gee(request.user, shp_file)
+
+        except TypeError:
+            return 'Incomplete or corrupted shapefile provided.'
+
+        except ee.EEException:
+            msg = 'An unexpected error occurred while uploading the shapefile to Google Earth Engine.'
+            log.exception(msg)
+            return msg
 
 
 def find_shapefile(directory):
