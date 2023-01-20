@@ -1,16 +1,17 @@
-import logging
 import datetime as dt
+import logging
 from django.http import JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render
-from tethys_sdk.permissions import login_required
-from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView
-from .gee.products import EE_PRODUCTS
+from tethys_sdk.routing import controller
+from tethys_sdk.gizmos import SelectInput, DatePicker, Button
+from tethys_sdk.gizmos import MapView, MVView
 from .gee.methods import get_image_collection_asset
+from .gee.products import EE_PRODUCTS
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
 
 
-@login_required()
+@controller
 def home(request):
     """
     Controller for the app home page.
@@ -117,15 +118,8 @@ def home(request):
     load_button = Button(
         name='load_map',
         display_text='Load',
-        style='default',
+        style='outline-secondary',
         attributes={'id': 'load_map'}
-    )
-
-    clear_button = Button(
-        name='clear_map',
-        display_text='Clear',
-        style='default',
-        attributes={'id': 'clear_map'}
     )
 
     map_view = MapView(
@@ -154,6 +148,14 @@ def home(request):
         )
     )
 
+    clear_button = Button(
+        name='clear_map',
+        display_text='Clear',
+        style='outline-secondary',
+        attributes={'id': 'clear_map'},
+        classes='mt-2',
+    )
+
     context = {
         'platform_select': platform_select,
         'sensor_select': sensor_select,
@@ -170,7 +172,7 @@ def home(request):
     return render(request, 'earth_engine/home.html', context)
 
 
-@login_required()
+@controller
 def get_image_collection(request):
     """
     Controller to handle image collection requests.
