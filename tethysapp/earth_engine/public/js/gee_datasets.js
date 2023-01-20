@@ -76,7 +76,6 @@ var GEE_DATASETS = (function() {
             }
         });
 
-
         $('#start_date').on('change', function() {
             let start_date = $('#start_date').val();
 
@@ -121,10 +120,10 @@ var GEE_DATASETS = (function() {
         if (!m_platform in EE_PRODUCTS) {
             alert('Unknown platform selected.');
         }
-
+    
         // Clear sensor options
         $('#sensor').select2().empty();
-
+    
         // Set the Sensor Options
         let first_option = true;
         for (var sensor in EE_PRODUCTS[m_platform]) {
@@ -133,7 +132,7 @@ var GEE_DATASETS = (function() {
             $('#sensor').append(new_option);
             first_option = false;
         }
-
+    
         // Trigger a sensor change event to update select box
         $('#sensor').trigger('change');
         update_date_bounds();
@@ -143,12 +142,12 @@ var GEE_DATASETS = (function() {
         if (!m_platform in EE_PRODUCTS || !m_sensor in EE_PRODUCTS[m_platform]) {
             alert('Unknown platform or sensor selected.');
         }
-
+    
         // Clear product options
         $('#product').select2().empty();
-
+    
         let first_option = true;
-
+    
         // Set the Product Options
         for (var product in EE_PRODUCTS[m_platform][m_sensor]) {
             let product_display_name = EE_PRODUCTS[m_platform][m_sensor][product]['display'];
@@ -156,7 +155,7 @@ var GEE_DATASETS = (function() {
             $('#product').append(new_option);
             first_option = false;
         }
-
+    
         // Trigger a product change event to update select box
         $('#product').trigger('change');
         update_date_bounds();
@@ -166,24 +165,24 @@ var GEE_DATASETS = (function() {
         // Get new date picker bounds for the current product
         let earliest_valid_date = EE_PRODUCTS[m_platform][m_sensor][m_product]['start_date'];
         let latest_valid_date = EE_PRODUCTS[m_platform][m_sensor][m_product]['end_date'];
-
+    
         // Get current values of date pickers
         let current_start_date = $('#start_date').val();
         let current_end_date = $('#end_date').val();
-
+    
         // Convert to Dates objects for comparison
         let date_evd = Date.parse(earliest_valid_date);
         let date_lvd = Date.parse(latest_valid_date) ? (latest_valid_date) : Date.now();
         let date_csd = Date.parse(current_start_date);
         let date_ced = Date.parse(current_end_date);
-
+    
         // Don't reset currently selected dates if they fall within the new date range
         let reset_current_dates = true;
-
+    
         if (date_csd >= date_evd && date_csd <= date_lvd && date_ced >= date_evd && date_ced <= date_lvd) {
             reset_current_dates = false;
         }
-
+    
         // Update start date datepicker bounds
         $('#start_date').datepicker('setStartDate', earliest_valid_date);
         $('#start_date').datepicker('setEndDate', latest_valid_date);
@@ -191,7 +190,7 @@ var GEE_DATASETS = (function() {
             $('#start_date').datepicker('update', INITIAL_START_DATE);
             m_start_date = INITIAL_START_DATE;
         }
-
+    
         // Update end date datepicker bounds
         $('#end_date').datepicker('setStartDate', earliest_valid_date);
         $('#end_date').datepicker('setEndDate', latest_valid_date);
@@ -199,7 +198,7 @@ var GEE_DATASETS = (function() {
             $('#end_date').datepicker('update', INITIAL_END_DATE);
             m_end_date = INITIAL_END_DATE;
         }
-
+    
         console.log('Date Bounds Changed To: ' + earliest_valid_date + ' - ' + latest_valid_date);
     };
 
@@ -219,14 +218,14 @@ var GEE_DATASETS = (function() {
     // Map Methods
     update_map = function() {
         let data = collect_data();
-
+    
         let xhr = $.ajax({
             type: 'POST',
             url: 'get-image-collection/',
             dataType: 'json',
             data: data
         });
-
+    
         xhr.done(function(response) {
             if (response.success) {
                 console.log(response.url);
@@ -250,25 +249,25 @@ var GEE_DATASETS = (function() {
             url: url,
             attributions: '<a href="https://earthengine.google.com" target="_">Google Earth Engine</a>'
         });
-
+    
         source.on('tileloadstart', function() {
             $('#loader').addClass('show');
         });
-
+    
         source.on('tileloadend', function() {
             $('#loader').removeClass('show');
         });
-
+    
         source.on('tileloaderror', function() {
             $('#loader').removeClass('show');
         });
-
+    
         m_gee_layer = new ol.layer.Tile({
             source: source,
             opacity: 0.7
         });
-
-        // Insert below the draw layer (so drawn polygons and points render on top of data layer).
+    
+        // Insert below the draw layer (so drawn polygons and points render on top of the data layer).
         m_map.getLayers().insertAt(1, m_gee_layer);
     };
 
@@ -288,9 +287,9 @@ var GEE_DATASETS = (function() {
 
     update_plot = function() {
         let data = collect_data();
-
+    
         show_plot_modal();
-
+    
         $('#plot-container').load('get-time-series-plot/', data);
     };
 

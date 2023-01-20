@@ -1,20 +1,13 @@
 {% extends "earth_engine/base.html" %}
 {% load tethys_gizmos static %}
 
-{% block content_dependent_styles %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{% static 'earth_engine/css/map.css' %}" />
-    <link rel="stylesheet" href="{% static 'earth_engine/css/loader.css' %}" />
-    <link rel="stylesheet" href="{% static 'earth_engine/css/plot.css' %}" />
-{% endblock %}
-
 {% block import_gizmos %}
   {% import_gizmo_dependency plotly_view %}
 {% endblock %}
 
 {% block header_buttons %}
   <div class="header-button glyphicon-button">
-    <a href="{% url 'earth_engine:home' %}" title="Home"><span class="glyphicon glyphicon-home"></span></a>
+    <a href="{% url 'earth_engine:home' %}" title="Home"><i class="bi bi-house-door-fill"></i></a>
   </div>
 {% endblock %}
 
@@ -29,7 +22,7 @@
   <p class="help">Change variables to select a data product, then press "Load" to add that product to the map.</p>
   {% gizmo load_button %}
   {% gizmo clear_button %}
-  <p class="help">Draw an area of interest or drop a point, the press "Plot AOI" to view a plot of the data.</p>
+  <p class="help mt-2">Draw an area of interest or drop a point, the press "Plot AOI" to view a plot of the data.</p>
   {% gizmo plot_button %}
 {% endblock %}
 
@@ -44,8 +37,8 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           <h5 class="modal-title" id="plot-modal-label">Area of Interest Plot</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div id="plot-container"></div>
@@ -63,4 +56,11 @@
 {% block scripts %}
   {{ block.super }}
   <script src="{% static 'earth_engine/js/gee_datasets.js' %}" type="text/javascript"></script>
+{% endblock %}
+
+{% block content_dependent_styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'earth_engine/css/map.css' %}" />
+    <link rel="stylesheet" href="{% static 'earth_engine/css/loader.css' %}" />
+    <link rel="stylesheet" href="{% static 'earth_engine/css/plot.css' %}" />
 {% endblock %}
