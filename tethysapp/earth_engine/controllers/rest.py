@@ -1,17 +1,19 @@
-import logging
 import datetime as dt
+import logging
 import geojson
-from simplejson import JSONDecodeError
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseServerError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes
-from ..gee.products import EE_PRODUCTS
-from ..gee.methods import get_time_series_from_image_collection
+from simplejson import JSONDecodeError
+from tethys_sdk.routing import controller
 from ..helpers import compute_dates_for_product
+from ..gee.methods import get_time_series_from_image_collection
+from ..gee.products import EE_PRODUCTS
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
 
 
+@controller(url='api/get-time-series', login_required=False)
 @api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,))
 def get_time_series(request):
