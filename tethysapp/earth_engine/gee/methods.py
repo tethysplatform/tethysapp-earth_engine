@@ -1,14 +1,13 @@
-import os
 import math
+import os
 import logging
 import ee
 from ee.ee_exception import EEException
 import geojson
 import pandas as pd
-from . import cloud_mask as cm
 from .products import EE_PRODUCTS
+from . import cloud_mask as cm
 from ..app import EarthEngine as app
-
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
 

@@ -1,5 +1,9 @@
 #plot-loader {
-    margin: 65px 84px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+    flex-direction: column;
 }
 
 #plot-loader p {
@@ -8,4 +12,9 @@
 
 #plot-modal .modal-body {
     min-height: 480px;
+}
+
+.modal-dialog {
+    max-width: 70vw;
+    margin: 1.75rem auto;
 }

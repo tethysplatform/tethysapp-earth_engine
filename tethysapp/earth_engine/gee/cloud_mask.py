@@ -3,7 +3,7 @@ import ee
 
 def mask_l8_sr(image):
     """
-    Derived From: https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_SR
+    Cloud Mask for Landsat 8 surface reflectance. Derived From: https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_SR
     """
     # Bits 3 and 5 are cloud shadow and cloud, respectively.
     cloudShadowBitMask = (1 << 3)
@@ -19,7 +19,7 @@ def mask_l8_sr(image):
 
 def cloud_mask_l457(image):
     """
-    Derived From: https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C01_T1_SR
+    Cloud Mask for Landsat 7 surface reflectance. Derived From: https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C01_T1_SR
     """
     qa = image.select('pixel_qa')
 
@@ -35,7 +35,7 @@ def cloud_mask_l457(image):
 
 def mask_s2_clouds(image):
     """
-    Derived from: https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2
+    Cloud Mask for Sentinel 2 surface reflectance. Derived from: https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2
     """
     qa = image.select('QA60')
 

@@ -1,11 +1,11 @@
 import logging
 from django.shortcuts import render
-from tethys_sdk.permissions import login_required
+from tethys_sdk.routing import controller
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
 
 
-@login_required()
+@controller
 def home(request):
     """
     Controller for the app home page.
@@ -14,7 +14,7 @@ def home(request):
     return render(request, 'earth_engine/home.html', context)
 
 
-@login_required()
+@controller
 def about(request):
     """
     Controller for the app about page.
