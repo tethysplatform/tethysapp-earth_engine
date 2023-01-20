@@ -1,11 +1,11 @@
 import datetime as dt
 from django.shortcuts import render
-from tethys_sdk.permissions import login_required
+from tethys_sdk.routing import controller
 from tethys_sdk.gizmos import SelectInput, DatePicker, Button
 from .gee.products import EE_PRODUCTS
 
 
-@login_required()
+@controller
 def home(request):
     """
     Controller for the app home page.
@@ -112,7 +112,7 @@ def home(request):
     load_button = Button(
         name='load_map',
         display_text='Load',
-        style='default',
+        style='outline-secondary',
         attributes={'id': 'load_map'}
     )
 
