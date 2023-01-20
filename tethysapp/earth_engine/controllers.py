@@ -1,19 +1,19 @@
-import logging
 import datetime as dt
 import geojson
+import logging
+from simplejson.errors import JSONDecodeError
 from django.http import JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render
-from simplejson.errors import JSONDecodeError
+from tethys_sdk.routing import controller
 from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, PlotlyView, MVDraw
-from tethys_sdk.permissions import login_required
-from .helpers import generate_figure
 from .gee.methods import get_image_collection_asset, get_time_series_from_image_collection
 from .gee.products import EE_PRODUCTS
+from .helpers import generate_figure
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
 
 
-@login_required()
+@controller
 def home(request):
     """
     Controller for the app home page.
@@ -22,7 +22,7 @@ def home(request):
     return render(request, 'earth_engine/home.html', context)
 
 
-@login_required()
+@controller
 def about(request):
     """
     Controller for the app about page.
@@ -31,10 +31,10 @@ def about(request):
     return render(request, 'earth_engine/about.html', context)
 
 
-@login_required()
+@controller
 def viewer(request):
     """
-    Controller for the app viewer page.
+    Controller for the app home page.
     """
     default_platform = 'modis'
     default_sensors = EE_PRODUCTS[default_platform]
@@ -138,22 +138,8 @@ def viewer(request):
     load_button = Button(
         name='load_map',
         display_text='Load',
-        style='default',
+        style='outline-secondary',
         attributes={'id': 'load_map'}
-    )
-
-    clear_button = Button(
-        name='clear_map',
-        display_text='Clear',
-        style='default',
-        attributes={'id': 'clear_map'}
-    )
-
-    plot_button = Button(
-        name='load_plot',
-        display_text='Plot AOI',
-        style='default',
-        attributes={'id': 'load_plot'}
     )
 
     map_view = MapView(
@@ -187,6 +173,21 @@ def viewer(request):
         )
     )
 
+    clear_button = Button(
+        name='clear_map',
+        display_text='Clear',
+        style='outline-secondary',
+        attributes={'id': 'clear_map'},
+        classes='mt-2',
+    )
+
+    plot_button = Button(
+        name='load_plot',
+        display_text='Plot AOI',
+        style='outline-secondary',
+        attributes={'id': 'load_plot'},
+    )
+
     context = {
         'platform_select': platform_select,
         'sensor_select': sensor_select,
@@ -204,7 +205,7 @@ def viewer(request):
     return render(request, 'earth_engine/viewer.html', context)
 
 
-@login_required()
+@controller(url='viewer/get-image-collection')
 def get_image_collection(request):
     """
     Controller to handle image collection requests.
@@ -245,8 +246,7 @@ def get_image_collection(request):
 
     return JsonResponse(response_data)
 
-
-@login_required()
+@controller(url='viewer/get-time-series-plot')
 def get_time_series_plot(request):
     context = {'success': False}
 
