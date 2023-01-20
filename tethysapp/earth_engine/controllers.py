@@ -1,24 +1,19 @@
-import os
-import tempfile
-import zipfile
-import logging
 import datetime as dt
 import geojson
-import shapefile
+import logging
+from simplejson.errors import JSONDecodeError
 from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import render
-from simplejson.errors import JSONDecodeError
+from tethys_sdk.routing import controller
 from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, PlotlyView, MVDraw
-from tethys_sdk.permissions import login_required
-from tethys_sdk.workspaces import user_workspace
-from .helpers import generate_figure, find_shapefile, write_boundary_shapefile, prep_boundary_dir
 from .gee.methods import get_image_collection_asset, get_time_series_from_image_collection
 from .gee.products import EE_PRODUCTS
+from .helpers import generate_figure, handle_shapefile_upload
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
 
 
-@login_required()
+@controller
 def home(request):
     """
     Controller for the app home page.
@@ -27,7 +22,7 @@ def home(request):
     return render(request, 'earth_engine/home.html', context)
 
 
-@login_required()
+@controller
 def about(request):
     """
     Controller for the app about page.
@@ -36,8 +31,7 @@ def about(request):
     return render(request, 'earth_engine/about.html', context)
 
 
-@login_required()
-@user_workspace
+@controller(user_workspace=True)
 def viewer(request, user_workspace):
     """
     Controller for the app viewer page.
@@ -144,22 +138,8 @@ def viewer(request, user_workspace):
     load_button = Button(
         name='load_map',
         display_text='Load',
-        style='default',
+        style='outline-secondary',
         attributes={'id': 'load_map'}
-    )
-
-    clear_button = Button(
-        name='clear_map',
-        display_text='Clear',
-        style='default',
-        attributes={'id': 'clear_map'}
-    )
-
-    plot_button = Button(
-        name='load_plot',
-        display_text='Plot AOI',
-        style='default',
-        attributes={'id': 'load_plot'}
     )
 
     map_view = MapView(
@@ -193,15 +173,30 @@ def viewer(request, user_workspace):
         )
     )
 
+    clear_button = Button(
+        name='clear_map',
+        display_text='Clear',
+        style='outline-secondary',
+        attributes={'id': 'clear_map'},
+        classes='mt-2',
+    )
+
+    plot_button = Button(
+        name='load_plot',
+        display_text='Plot AOI',
+        style='outline-secondary',
+        attributes={'id': 'load_plot'},
+    )
+
     # Boundary Upload Form
     set_boundary_button = Button(
         name='set_boundary',
         display_text='Set Boundary',
-        style='default',
+        style='outline-secondary',
         attributes={
             'id': 'set_boundary',
-            'data-toggle': 'modal',
-            'data-target': '#set-boundary-modal'  # ID of the Set Boundary Modal
+            'data-bs-toggle': 'modal',
+            'data-bs-target': '#set-boundary-modal',  # ID of the Set Boundary Modal
         }
     )
 
@@ -233,7 +228,7 @@ def viewer(request, user_workspace):
     return render(request, 'earth_engine/viewer.html', context)
 
 
-@login_required()
+@controller(url='viewer/get-image-collection')
 def get_image_collection(request):
     """
     Controller to handle image collection requests.
@@ -274,8 +269,7 @@ def get_image_collection(request):
 
     return JsonResponse(response_data)
 
-
-@login_required()
+@controller(url='viewer/get-time-series-plot')
 def get_time_series_plot(request):
     context = {'success': False}
 
@@ -345,57 +339,3 @@ def get_time_series_plot(request):
         log.exception('An unexpected error occurred.')
 
     return render(request, 'earth_engine/plot.html', context)
-
-
-def handle_shapefile_upload(request, user_workspace):
-    """
-    Uploads shapefile to Google Earth Engine as an Asset.
-
-    Args:
-        request (django.Request): the request object.
-        user_workspace (tethys_sdk.workspaces.Workspace): the User workspace object.
-
-    Returns:
-        str: Error string if errors occurred.
-    """
-    # Write file to temp for processing
-    uploaded_file = request.FILES['boundary-file']
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_zip_path = os.path.join(temp_dir, 'boundary.zip')
-
-        # Use with statements to ensure opened files are closed when done
-        with open(temp_zip_path, 'wb') as temp_zip:
-            for chunk in uploaded_file.chunks():
-                temp_zip.write(chunk)
-
-        try:
-            # Extract the archive to the temporary directory
-            with zipfile.ZipFile(temp_zip_path) as temp_zip:
-                temp_zip.extractall(temp_dir)
-
-        except zipfile.BadZipFile:
-            # Return error message
-            return 'You must provide a zip archive containing a shapefile.'
-
-        # Verify that it contains a shapefile
-        try:
-            # Find a shapefile in directory where we extracted the archive
-            shapefile_path = find_shapefile(temp_dir)
-
-            if not shapefile_path:
-                return 'No Shapefile found in the archive provided.'
-
-            with shapefile.Reader(shapefile_path) as shp_file:
-                # Check type (only Polygon supported)
-                if shp_file.shapeType != shapefile.POLYGON:
-                    return 'Only shapefiles containing Polygons are supported.'
-
-                # Setup workspace directory for storing shapefile
-                workspace_dir = prep_boundary_dir(user_workspace.path)
-
-                # Write the shapefile to the workspace directory
-                write_boundary_shapefile(shp_file, workspace_dir)
-
-        except TypeError:
-            return 'Incomplete or corrupted shapefile provided.'

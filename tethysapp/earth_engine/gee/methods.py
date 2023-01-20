@@ -3,10 +3,9 @@ import ee
 from ee.ee_exception import EEException
 import geojson
 import pandas as pd
+from .products import EE_PRODUCTS
 from . import params as gee_account
 from . import cloud_mask as cm
-from .products import EE_PRODUCTS
-
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
 

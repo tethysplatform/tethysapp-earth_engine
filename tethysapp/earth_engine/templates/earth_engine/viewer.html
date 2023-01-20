@@ -1,13 +1,6 @@
 {% extends "earth_engine/base.html" %}
 {% load tethys_gizmos static %}
 
-{% block content_dependent_styles %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{% static 'earth_engine/css/map.css' %}" />
-    <link rel="stylesheet" href="{% static 'earth_engine/css/loader.css' %}" />
-    <link rel="stylesheet" href="{% static 'earth_engine/css/plot.css' %}" />
-{% endblock %}
-
 {% block import_gizmos %}
   {% import_gizmo_dependency plotly_view %}
 {% endblock %}
@@ -23,9 +16,9 @@
   <p class="help">Change variables to select a data product, then press "Load" to add that product to the map.</p>
   {% gizmo load_button %}
   {% gizmo clear_button %}
-  <p class="help">Draw an area of interest or drop a point, the press "Plot AOI" to view a plot of the data.</p>
+  <p class="help mt-2">Draw an area of interest or drop a point, the press "Plot AOI" to view a plot of the data.</p>
   {% gizmo plot_button %}
-  <p class="help">Upload a shapefile of a boundary to use to clip datasets and set the default extent.</p>
+  <p class="help mt-2">Upload a shapefile of a boundary to use to clip datasets and set the default extent.</p>
   {% gizmo set_boundary_button %}
 {% endblock %}
 
@@ -41,8 +34,8 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           <h5 class="modal-title" id="plot-modal-label">Area of Interest Plot</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div id="plot-container"></div>
@@ -56,26 +49,26 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           <h5 class="modal-title" id="set-boundary-modal-label">Set Boundary</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <form class="horizontal-form" id="set-boundary-form" method="post" action="" enctype="multipart/form-data">
             <p>Create a zip archive containing a shapefile and supporting files (i.e.: .shp, .shx, .dbf). Then use the file browser button below to select it.</p>
             <!-- This is required for POST method -->
             {% csrf_token %}
-            <div id="boundary-file-form-group" class="form-group{% if set_boundary_error %} has-error{% endif %}">
-              <label class="control-label" for="boundary-file">Boundary Shapefile</label>
-              <input type="file" name="boundary-file" id="boundary-file" accept="zip">
+            <div id="boundary-file-form-group" class="mb-3">
+              <label class="form-label" for="boundary-file">Boundary Shapefile</label>
+              <input type="file" name="boundary-file" id="boundary-file" class="form-control{% if set_boundary_error %} is-invalid{% endif %}" accept=".zip">
               {% if set_boundary_error %}
-              <p class="help-block">{{ set_boundary_error }}</p>
+              <p class="invalid-feedback">{{ set_boundary_error }}</p>
               {% endif %}
             </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-          <input type="submit" class="btn btn-default" value="Set Boundary" name="set-boundary-submit" id="set-boundary-submit" form="set-boundary-form">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <input type="submit" class="btn btn-secondary" value="Set Boundary" name="set-boundary-submit" id="set-boundary-submit" form="set-boundary-form">
         </div>
       </div>
     </div>
@@ -90,4 +83,11 @@
 {% block scripts %}
   {{ block.super }}
   <script src="{% static 'earth_engine/js/gee_datasets.js' %}" type="text/javascript"></script>
+{% endblock %}
+
+{% block content_dependent_styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'earth_engine/css/map.css' %}" />
+    <link rel="stylesheet" href="{% static 'earth_engine/css/loader.css' %}" />
+    <link rel="stylesheet" href="{% static 'earth_engine/css/plot.css' %}" />
 {% endblock %}
