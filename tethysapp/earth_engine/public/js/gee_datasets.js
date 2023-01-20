@@ -66,7 +66,6 @@ var GEE_DATASETS = (function() {
             }
         });
 
-
         $('#start_date').on('change', function() {
             let start_date = $('#start_date').val();
 
@@ -104,10 +103,10 @@ var GEE_DATASETS = (function() {
         if (!m_platform in EE_PRODUCTS) {
             alert('Unknown platform selected.');
         }
-
+    
         // Clear sensor options
         $('#sensor').select2().empty();
-
+    
         // Set the Sensor Options
         let first_option = true;
         for (var sensor in EE_PRODUCTS[m_platform]) {
@@ -116,7 +115,7 @@ var GEE_DATASETS = (function() {
             $('#sensor').append(new_option);
             first_option = false;
         }
-
+    
         // Trigger a sensor change event to update select box
         $('#sensor').trigger('change');
         update_date_bounds();
@@ -126,12 +125,12 @@ var GEE_DATASETS = (function() {
         if (!m_platform in EE_PRODUCTS || !m_sensor in EE_PRODUCTS[m_platform]) {
             alert('Unknown platform or sensor selected.');
         }
-
+    
         // Clear product options
         $('#product').select2().empty();
-
+    
         let first_option = true;
-
+    
         // Set the Product Options
         for (var product in EE_PRODUCTS[m_platform][m_sensor]) {
             let product_display_name = EE_PRODUCTS[m_platform][m_sensor][product]['display'];
@@ -139,7 +138,7 @@ var GEE_DATASETS = (function() {
             $('#product').append(new_option);
             first_option = false;
         }
-
+    
         // Trigger a product change event to update select box
         $('#product').trigger('change');
         update_date_bounds();
@@ -149,24 +148,24 @@ var GEE_DATASETS = (function() {
         // Get new date picker bounds for the current product
         let earliest_valid_date = EE_PRODUCTS[m_platform][m_sensor][m_product]['start_date'];
         let latest_valid_date = EE_PRODUCTS[m_platform][m_sensor][m_product]['end_date'];
-
+    
         // Get current values of date pickers
         let current_start_date = $('#start_date').val();
         let current_end_date = $('#end_date').val();
-
+    
         // Convert to Dates objects for comparison
         let date_evd = Date.parse(earliest_valid_date);
         let date_lvd = Date.parse(latest_valid_date) ? (latest_valid_date) : Date.now();
         let date_csd = Date.parse(current_start_date);
         let date_ced = Date.parse(current_end_date);
-
+    
         // Don't reset currently selected dates if they fall within the new date range
         let reset_current_dates = true;
-
+    
         if (date_csd >= date_evd && date_csd <= date_lvd && date_ced >= date_evd && date_ced <= date_lvd) {
             reset_current_dates = false;
         }
-
+    
         // Update start date datepicker bounds
         $('#start_date').datepicker('setStartDate', earliest_valid_date);
         $('#start_date').datepicker('setEndDate', latest_valid_date);
@@ -174,7 +173,7 @@ var GEE_DATASETS = (function() {
             $('#start_date').datepicker('update', INITIAL_START_DATE);
             m_start_date = INITIAL_START_DATE;
         }
-
+    
         // Update end date datepicker bounds
         $('#end_date').datepicker('setStartDate', earliest_valid_date);
         $('#end_date').datepicker('setEndDate', latest_valid_date);
@@ -182,7 +181,7 @@ var GEE_DATASETS = (function() {
             $('#end_date').datepicker('update', INITIAL_END_DATE);
             m_end_date = INITIAL_END_DATE;
         }
-
+    
         console.log('Date Bounds Changed To: ' + earliest_valid_date + ' - ' + latest_valid_date);
     };
 
@@ -197,7 +196,6 @@ var GEE_DATASETS = (function() {
         };
         return data;
     };
-
 
     /************************************************************************
     *                            PUBLIC INTERFACE
