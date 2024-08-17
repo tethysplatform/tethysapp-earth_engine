@@ -7,74 +7,73 @@
 {% endblock %}
 
 {% block header_buttons %}
-  {% include "earth_engine/header_buttons.html" %}
+  {% include tethys_app.package|add:"/header_buttons.html" %}
 {% endblock %}
 
 {% block app_content %}
-<div  id="home-content-container" class="container-fluid">
-  <div class="row">
-    <div class="col-md-8">
-      <div id="about-container" class="info-container">
-        <h2 class="info-title">About</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Eget est lorem ipsum dolor sit amet. Morbi tincidunt augue interdum velit euismod in pellentesque.</p>
-        <p>Ac felis donec et odio pellentesque. Quis ipsum suspendisse ultrices gravida dictum fusce ut. Curabitur gravida arcu ac tortor dignissim convallis aenean et tortor. Sed euismod nisi porta lorem mollis. Nisi scelerisque eu ultrices vitae. Sit amet consectetur adipiscing elit duis. At in tellus integer feugiat scelerisque varius morbi enim.</p>
-        <img id="feature-image" src="{% static 'earth_engine/images/earth-engine-viewer.png' %}">
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="row">
-        <div class="col-md-12">
-          <div id="resources-container" class="info-container">
-            <h2 class="info-title">Resources</h2>
-            <div class="d-flex align-items-center">
-              <div class="flex-shrink-0">
-                <a href="#coast">
-                  <img class="media-object" src="{% static 'earth_engine/images/coast_80_80.jpg' %}" alt="coast">
-                </a>
-              </div>
-              <div class="media-body flex-grow-1 ms-3">
-                <h4 class="media-heading">Lorem Ipsum Dolor</h4>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              </div>
+<div id="home-content-container" class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div id="about-container" class="info-container">
+                <h2 class="info-title">About</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Eget est lorem ipsum dolor sit amet. Morbi tincidunt augue interdum velit euismod in pellentesque.</p>
+                <p>Ac felis donec et odio pellentesque. Quis ipsum suspendisse ultrices gravida dictum fusce ut. Curabitur gravida arcu ac tortor dignissim convallis aenean et tortor. Sed euismod nisi porta lorem mollis. Nisi scelerisque eu ultrices vitae. Sit amet consectetur adipiscing elit duis. At in tellus integer feugiat scelerisque varius morbi enim.</p>
+                <img id="feature-image" src="{% static 'earth_engine/images/earth-engine-viewer.png' %}">
             </div>
-
-            <div class="d-flex align-items-center mt-2">
-              <div class="flex-shrink-0">
-                <a href="#condensation">
-                  <img class="media-object" src="{% static 'earth_engine/images/condensation_80_80.jpg' %}" alt="condensation">
-                </a>
-              </div>
-              <div class="media-body flex-grow-1 ms-3">
-                <h4 class="media-heading">Ut Enim Ad Minim</h4>
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-              </div>
-            </div>
-
-            <div class="d-flex align-items-center mt-2">
-              <div class="flex-shrink-0">
-                <a href="#waterfall">
-                  <img class="media-object" src="{% static 'earth_engine/images/waterfall_80_80.jpg' %}" alt="waterfall">
-                </a>
-              </div>
-              <div class="media-body flex-grow-1 ms-3">
-                <h4 class="media-heading">Duis Aute Irure</h4>
-                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          <div class="media-body info-container">
-            <h2 class="info-title">Get Started</h2>
-            <p>Press the button below to launch the viewer</p>
-            <a id="get-started-btn" href="{% url 'earth_engine:viewer' %}">Launch Viewer</a>
-          </div>
+        <div class="col-md-4">
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="resources-container" class="info-container">
+                        <h2 class="info-title">Resources</h2>
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                              <a href="#coast">
+                                <img class="media-object" src="{% static 'earth_engine/images/coast_80_80.jpg' %}" alt="coast">
+                              </a>
+                            </div>
+                            <div class="media-body flex-grow-1 ms-3">
+                              <h4 class="media-heading">Lorem Ipsum Dolor</h4>
+                              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mt-2">
+                        <div class="flex-shrink-0">
+                            <a href="#condensation">
+                            <img class="media-object" src="{% static 'earth_engine/images/condensation_80_80.jpg' %}" alt="condensation">
+                            </a>
+                        </div>
+                        <div class="media-body flex-grow-1 ms-3">
+                            <h4 class="media-heading">Ut Enim Ad Minim</h4>
+                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                        </div>
+                        </div>
+                    
+                        <div class="d-flex align-items-center mt-2">
+                        <div class="flex-shrink-0">
+                            <a href="#waterfall">
+                            <img class="media-object" src="{% static 'earth_engine/images/waterfall_80_80.jpg' %}" alt="waterfall">
+                            </a>
+                        </div>
+                        <div class="media-body flex-grow-1 ms-3">
+                            <h4 class="media-heading">Duis Aute Irure</h4>
+                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                        </div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                    <div id="get-started-container" class="info-container">
+                        <h2 class="info-title">Get Started</h2>
+                        <p>Press the button below to launch the viewer</p>
+                        <a id="get-started-btn" href="{% url 'earth_engine:viewer' %}">Launch Viewer</a>
+                    </div>
+                </div>
+              </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 {% endblock %}
 
