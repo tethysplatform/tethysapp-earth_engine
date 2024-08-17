@@ -1,5 +1,5 @@
-{% extends "earth_engine/base.html" %}
-{% load tethys_gizmos static %}
+{% extends tethys_app.package|add:"/base.html" %}
+{% load static tethys %}
 
 {% block app_navigation_items %}
   <li class="title">Select Dataset</li>

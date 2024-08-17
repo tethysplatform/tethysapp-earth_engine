@@ -1,8 +1,8 @@
 import datetime as dt
-from django.shortcuts import render
 from tethys_sdk.routing import controller
 from tethys_sdk.gizmos import SelectInput, DatePicker, Button
 from .gee.products import EE_PRODUCTS
+from .app import App
 
 
 @controller
@@ -127,4 +127,4 @@ def home(request):
         'load_button': load_button,
     }
 
-    return render(request, 'earth_engine/home.html', context)
+    return App.render(request, 'home.html', context)
