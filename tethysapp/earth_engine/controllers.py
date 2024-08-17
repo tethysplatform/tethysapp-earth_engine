@@ -1,17 +1,17 @@
 import datetime as dt
-import geojson
 import logging
-from simplejson.errors import JSONDecodeError
 from django.http import JsonResponse, HttpResponseNotAllowed
-from django.shortcuts import render
+import geojson
+from simplejson.errors import JSONDecodeError
 from tethys_sdk.routing import controller
-from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, PlotlyView, MVDraw
-from .gee.methods import get_image_collection_asset, get_time_series_from_image_collection
+from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVDraw, MVView, PlotlyView
 from .gee.products import EE_PRODUCTS
+from .gee.methods import get_image_collection_asset, get_time_series_from_image_collection
+from .app import App
 from .helpers import generate_figure
 
-log = logging.getLogger(f'tethys.apps.{__name__}')
 
+log = logging.getLogger(f'tethys.apps.{__name__}')
 
 @controller
 def home(request):
@@ -123,7 +123,6 @@ def home(request):
         style='outline-secondary',
         attributes={'id': 'load_map'}
     )
-
     map_view = MapView(
         height='100%',
         width='100%',
@@ -131,7 +130,7 @@ def home(request):
             'ZoomSlider', 'Rotate', 'FullScreen',
             {'ZoomToExtent': {
                 'projection': 'EPSG:4326',
-                'extent': [29.25, -4.75, 46.25, 5.2]
+                'extent': [29.25, -4.75, 46.25, 5.2]  #: Kenya
             }}
         ],
         basemap=[
@@ -148,7 +147,7 @@ def home(request):
             maxZoom=18,
             minZoom=2
         ),
-        draw=MVDraw(
+        draw = MVDraw(
             controls=['Pan', 'Modify', 'Delete', 'Move', 'Point', 'Polygon', 'Box'],
             initial='Pan',
             output_format='GeoJSON'
@@ -184,8 +183,8 @@ def home(request):
         'map_view': map_view
     }
 
-    return render(request, 'earth_engine/home.html', context)
 
+    return App.render(request, 'home.html', context)
 
 @controller
 def get_image_collection(request):
@@ -297,4 +296,5 @@ def get_time_series_plot(request):
         context['error'] = f'An unexpected error has occurred. Please try again.'
         log.exception('An unexpected error occurred.')
 
-    return render(request, 'earth_engine/plot.html', context)
+    print(context)
+    return App.render(request, 'plot.html', context)

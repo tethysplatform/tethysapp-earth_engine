@@ -24,14 +24,13 @@ var GEE_DATASETS = (function() {
 
     // Map Variables
     var m_map,
-        m_gee_layer;
+    m_gee_layer;
 
     /************************************************************************
     *                    PRIVATE FUNCTION DECLARATIONS
     *************************************************************************/
     // Dataset Select Methods
     var bind_controls, update_product_options, update_sensor_options, update_date_bounds, collect_data;
-
     // Map Methods
     var update_map, update_data_layer, create_data_layer, clear_map;
 
@@ -45,7 +44,7 @@ var GEE_DATASETS = (function() {
     bind_controls = function() {
         $('#platform').on('change', function() {
             let platform = $('#platform').val();
-
+    
             if (platform !== m_platform) {
                 m_platform = platform;
                 console.log(`Platform Changed to: ${m_platform}`);
@@ -53,10 +52,10 @@ var GEE_DATASETS = (function() {
                 update_sensor_options();
             }
         });
-
+    
         $('#sensor').on('change', function() {
             let sensor = $('#sensor').val();
-
+    
             if (sensor !== m_sensor) {
                 m_sensor = sensor;
                 console.log(`Sensor Changed to: ${m_sensor}`);
@@ -64,10 +63,10 @@ var GEE_DATASETS = (function() {
                 update_product_options();
             }
         });
-
+    
         $('#product').on('change', function() {
             let product = $('#product').val();
-
+    
             if (product !== m_product) {
                 m_product = product;
                 console.log(`Product Changed to: ${m_product}`);
@@ -75,34 +74,33 @@ var GEE_DATASETS = (function() {
                 update_date_bounds();
             }
         });
-
+    
         $('#start_date').on('change', function() {
             let start_date = $('#start_date').val();
-
+    
             if (start_date !== m_start_date) {
                 m_start_date = start_date;
                 console.log(`Start Date Changed to: ${m_start_date}`);
             }
         });
-
+    
         $('#end_date').on('change', function() {
             let end_date = $('#end_date').val();
-
+    
             if (end_date !== m_end_date) {
                 m_end_date = end_date;
                 console.log(`End Date Changed to: ${m_end_date}`);
             }
         });
-
+    
         $('#reducer').on('change', function() {
             let reducer = $('#reducer').val();
-
+    
             if (reducer !== m_reducer) {
                 m_reducer = reducer;
                 console.log(`Reducer Changed to: ${m_reducer}`);
             }
         });
-
         $('#load_map').on('click', function() {
             update_map();
         });
@@ -209,12 +207,11 @@ var GEE_DATASETS = (function() {
             product: m_product,
             start_date: m_start_date,
             end_date: m_end_date,
-            reducer: m_reducer,
+            reducer: m_reducer, 
             geometry: get_geometry()
         };
         return data;
     };
-
     // Map Methods
     update_map = function() {
         let data = collect_data();
@@ -249,25 +246,25 @@ var GEE_DATASETS = (function() {
             url: url,
             attributions: '<a href="https://earthengine.google.com" target="_">Google Earth Engine</a>'
         });
-    
+        
         source.on('tileloadstart', function() {
             $('#loader').addClass('show');
         });
-    
+
         source.on('tileloadend', function() {
             $('#loader').removeClass('show');
         });
-    
+
         source.on('tileloaderror', function() {
             $('#loader').removeClass('show');
         });
-    
+
         m_gee_layer = new ol.layer.Tile({
             source: source,
             opacity: 0.7
         });
     
-        // Insert below the draw layer (so drawn polygons and points render on top of the data layer).
+        // Insert below the draw layer (so drawn polygons and points render on top of data layer).
         m_map.getLayers().insertAt(1, m_gee_layer);
     };
 
@@ -301,7 +298,7 @@ var GEE_DATASETS = (function() {
             '</div>'
         );
         $('#plot-modal').modal('show');
-    };
+    }
 
     /************************************************************************
     *                            PUBLIC INTERFACE
@@ -314,10 +311,10 @@ var GEE_DATASETS = (function() {
     $(function() {
         // Initialize Global Variables
         bind_controls();
-
+    
         // EE Products
         EE_PRODUCTS = $('#ee-products').data('ee-products');
-
+    
         // Initialize values
         m_platform = $('#platform').val();
         m_sensor = $('#sensor').val();
@@ -325,7 +322,7 @@ var GEE_DATASETS = (function() {
         INITIAL_START_DATE = m_start_date = $('#start_date').val();
         INITIAL_END_DATE = m_end_date = $('#end_date').val();
         m_reducer = $('#reducer').val();
-
+    
         m_map = TETHYS_MAP_VIEW.getMap();
     });
 
