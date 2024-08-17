@@ -4,22 +4,23 @@ import logging
 from simplejson.errors import JSONDecodeError
 
 from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponseRedirect
-from django.shortcuts import render
 from tethys_sdk.routing import controller
 from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView, PlotlyView, MVDraw
+
+from ..app import App
 
 from ..helpers import generate_figure, handle_shapefile_upload, compute_dates_for_product
 from ..gee.methods import get_image_collection_asset, get_time_series_from_image_collection, \
     get_boundary_fc_props_for_user
 from ..gee.products import EE_PRODUCTS
 
+
 log = logging.getLogger(f'tethys.apps.{__name__}')
 
-
-@controller(user_workspace=True, url='viewer')
-def viewer(request, user_workspace):
+@controller(user_media=True, url='viewer')
+def viewer(request, user_media):
     """
-    Controller for the app viewer page.
+    Controller for the app home page.
     """
     default_platform = 'modis'
     default_sensors = EE_PRODUCTS[default_platform]
@@ -115,7 +116,7 @@ def viewer(request, user_workspace):
         style='outline-secondary',
         attributes={'id': 'load_map'}
     )
-    
+
     # Get bounding box from user boundary if it exists
     boundary_props = get_boundary_fc_props_for_user(request.user)
 
@@ -143,7 +144,7 @@ def viewer(request, user_workspace):
             maxZoom=18,
             minZoom=2
         ),
-        draw=MVDraw(
+        draw = MVDraw(
             controls=['Pan', 'Modify', 'Delete', 'Move', 'Point', 'Polygon', 'Box'],
             initial='Pan',
             output_format='GeoJSON'
@@ -176,11 +177,10 @@ def viewer(request, user_workspace):
             'data-bs-target': '#set-boundary-modal',  # ID of the Set Boundary Modal
         }
     )
-
     # Handle Set Boundary Form
     set_boundary_error = ''
     if request.POST and request.FILES:
-        set_boundary_error = handle_shapefile_upload(request, user_workspace)
+        set_boundary_error = handle_shapefile_upload(request, user_media)
 
         if not set_boundary_error:
             # Redirect back to this page to clear form
@@ -202,8 +202,8 @@ def viewer(request, user_workspace):
         'map_view': map_view
     }
 
-    return render(request, 'earth_engine/viewer.html', context)
 
+    return App.render(request, 'viewer.html', context)
 
 @controller(url='viewer/get-image-collection')
 def get_image_collection(request):
@@ -316,4 +316,6 @@ def get_time_series_plot(request):
         context['error'] = f'An unexpected error has occurred. Please try again.'
         log.exception('An unexpected error occurred.')
 
-    return render(request, 'earth_engine/plot.html', context)
+    print(context)
+    return App.render(request, 'plot.html', context)
+

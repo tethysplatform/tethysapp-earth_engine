@@ -10,7 +10,9 @@ release_package = f'{TethysAppBase.package_namespace}-{app_package}'
 dependencies = []
 
 # -- Get Resource File -- #
-resource_files = find_all_resource_files(app_package, TethysAppBase.package_namespace)
+resource_files = find_all_resource_files(
+    app_package, TethysAppBase.package_namespace
+)
 
 with open('README.md', 'r') as f:
     long_description = f.read()
@@ -20,9 +22,9 @@ setup(
     version='1.0.0',
     description='A Google Earth Engine demonstration Tethys App.',
     long_description=long_description,
-    author='Luke Skywalker',
-    author_email='lskywalker@example.com',
-    url='',
+    author='<YOUR NAME>',
+    author_email='<YOUR EMAIL>',
+    url='',  # The URL will be set in a future step.
     license='BSD-3-Clause',
     packages=find_namespace_packages(),
     package_data={'': resource_files},

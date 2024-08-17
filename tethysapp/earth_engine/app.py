@@ -1,13 +1,11 @@
-from tethys_sdk.app_settings import CustomSetting
 from tethys_sdk.base import TethysAppBase
+from tethys_sdk.app_settings import CustomSetting
 
-
-class EarthEngine(TethysAppBase):
+class App(TethysAppBase):
     """
     Tethys app class for Earth Engine.
     """
-
-    name = 'Google Earth Engine Tutorial'
+    name = 'Earth Engine'
     description = ''
     package = 'earth_engine'  # WARNING: Do not change this value
     index = 'home'
