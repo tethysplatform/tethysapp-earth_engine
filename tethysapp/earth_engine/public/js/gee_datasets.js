@@ -35,7 +35,7 @@ var GEE_DATASETS = (function() {
     bind_controls = function() {
         $('#platform').on('change', function() {
             let platform = $('#platform').val();
-
+    
             if (platform !== m_platform) {
                 m_platform = platform;
                 console.log(`Platform Changed to: ${m_platform}`);
@@ -43,10 +43,10 @@ var GEE_DATASETS = (function() {
                 update_sensor_options();
             }
         });
-
+    
         $('#sensor').on('change', function() {
             let sensor = $('#sensor').val();
-
+    
             if (sensor !== m_sensor) {
                 m_sensor = sensor;
                 console.log(`Sensor Changed to: ${m_sensor}`);
@@ -54,10 +54,10 @@ var GEE_DATASETS = (function() {
                 update_product_options();
             }
         });
-
+    
         $('#product').on('change', function() {
             let product = $('#product').val();
-
+    
             if (product !== m_product) {
                 m_product = product;
                 console.log(`Product Changed to: ${m_product}`);
@@ -65,34 +65,33 @@ var GEE_DATASETS = (function() {
                 update_date_bounds();
             }
         });
-
+    
         $('#start_date').on('change', function() {
             let start_date = $('#start_date').val();
-
+    
             if (start_date !== m_start_date) {
                 m_start_date = start_date;
                 console.log(`Start Date Changed to: ${m_start_date}`);
             }
         });
-
+    
         $('#end_date').on('change', function() {
             let end_date = $('#end_date').val();
-
+    
             if (end_date !== m_end_date) {
                 m_end_date = end_date;
                 console.log(`End Date Changed to: ${m_end_date}`);
             }
         });
-
+    
         $('#reducer').on('change', function() {
             let reducer = $('#reducer').val();
-
+    
             if (reducer !== m_reducer) {
                 m_reducer = reducer;
                 console.log(`Reducer Changed to: ${m_reducer}`);
             }
         });
-
         $('#load_map').on('click', function() {
             let data = collect_data();
             console.log(data);

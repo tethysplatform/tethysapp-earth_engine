@@ -1,9 +1,8 @@
 import datetime as dt
-from django.shortcuts import render
 from tethys_sdk.routing import controller
-from tethys_sdk.gizmos import SelectInput, DatePicker, Button
-from tethys_sdk.gizmos import MapView, MVView
+from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView
 from .gee.products import EE_PRODUCTS
+from .app import App
 
 
 @controller
@@ -116,31 +115,30 @@ def home(request):
         style='outline-secondary',
         attributes={'id': 'load_map'}
     )
-
     map_view = MapView(
-        height='100%',
-        width='100%',
-        controls=[
-            'ZoomSlider', 'Rotate', 'FullScreen',
-            {'ZoomToExtent': {
-                'projection': 'EPSG:4326',
-                'extent': [29.25, -4.75, 46.25, 5.2]  #: Kenya
-            }}
-        ],
-        basemap=[
-            'CartoDB',
-            {'CartoDB': {'style': 'dark'}},
-            'OpenStreetMap',
-            'Stamen',
-            'ESRI'
-        ],
-        view=MVView(
-            projection='EPSG:4326',
-            center=[37.880859, 0.219726],
-            zoom=7,
-            maxZoom=18,
-            minZoom=2
-        )
+    height='100%',
+    width='100%',
+    controls=[
+        'ZoomSlider', 'Rotate', 'FullScreen',
+        {'ZoomToExtent': {
+            'projection': 'EPSG:4326',
+            'extent': [29.25, -4.75, 46.25, 5.2]  #: Kenya
+        }}
+    ],
+    basemap=[
+        'CartoDB',
+        {'CartoDB': {'style': 'dark'}},
+        'OpenStreetMap',
+        'Stamen',
+        'ESRI'
+    ],
+    view=MVView(
+        projection='EPSG:4326',
+        center=[37.880859, 0.219726],
+        zoom=7,
+        maxZoom=18,
+        minZoom=2
+    )
     )
 
     context = {
@@ -155,4 +153,5 @@ def home(request):
         'map_view': map_view
     }
 
-    return render(request, 'earth_engine/home.html', context)
+
+    return App.render(request, 'home.html', context)

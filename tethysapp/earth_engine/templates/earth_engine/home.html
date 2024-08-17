@@ -1,5 +1,5 @@
-{% extends "earth_engine/base.html" %}
-{% load tethys_gizmos static %}
+{% extends tethys_app.package|add:"/base.html" %}
+{% load static tethys %}
 
 {% block app_navigation_items %}
   <li class="title">Select Dataset</li>
@@ -17,17 +17,17 @@
   {% gizmo map_view %}
 {% endblock %}
 
-{# Use the after_app_content block for modals #}
-{% block after_app_content %}
-  <div id="ee-products" data-ee-products="{{ ee_products|jsonify }}"></div>
+{% block content_dependent_styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static tethys_app|public:'css/map.css' %}" />
 {% endblock %}
 
 {% block scripts %}
   {{ block.super }}
-  <script src="{% static 'earth_engine/js/gee_datasets.js' %}" type="text/javascript"></script>
+  <script src="{% static tethys_app|public:'js/gee_datasets.js' %}" type="text/javascript"></script>
 {% endblock %}
 
-{% block content_dependent_styles %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{% static 'earth_engine/css/map.css' %}" />
+{# Use the after_app_content block for modals #}
+{% block after_app_content %}
+  <div id="ee-products" data-ee-products="{{ ee_products|jsonify }}"></div>
 {% endblock %}
