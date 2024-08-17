@@ -1,13 +1,14 @@
-import math
-import os
 import logging
 import ee
 from ee.ee_exception import EEException
+from . import params as gee_account
+from .products import EE_PRODUCTS
+from . import cloud_mask as cm
 import geojson
 import pandas as pd
-from .products import EE_PRODUCTS
-from . import params as gee_account
-from . import cloud_mask as cm
+import os
+import json
+import math
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
 
@@ -15,20 +16,14 @@ if gee_account.service_account:
     try:
         credentials = ee.ServiceAccountCredentials(gee_account.service_account, gee_account.private_key)
         ee.Initialize(credentials)
+        log.info('Successfully initialized GEE using service account.')
     except EEException as e:
-        print(str(e))
+        log.warning('Unable to initialize GEE using service account. If installing ignore this warning.')
 else:
     try:
         ee.Initialize()
     except EEException as e:
-        from oauth2client.service_account import ServiceAccountCredentials
-        credentials = ServiceAccountCredentials.from_p12_keyfile(
-            service_account_email='',
-            filename='',
-            private_key_password='notasecret',
-            scopes=ee.oauth.SCOPE + ' https://www.googleapis.com/auth/drive '
-        )
-        ee.Initialize(credentials)
+        log.warning('Unable to initialize GEE with local credentials. If installing ignore this warning.')
 
 
 def image_to_map_id(image_name, vis_params={}):
@@ -43,7 +38,6 @@ def image_to_map_id(image_name, vis_params={}):
 
     except EEException:
         log.exception('An error occurred while attempting to retrieve the map id.')
-
 
 def get_image_collection_asset(request, platform, sensor, product, date_from=None, date_to=None, reducer='median'):
     """
@@ -90,7 +84,6 @@ def get_image_collection_asset(request, platform, sensor, product, date_from=Non
 
     except EEException:
         log.exception('An error occurred while attempting to retrieve the image collection asset.')
-
 
 def get_time_series_from_image_collection(platform, sensor, product, index_name, scale=30, geometry=None,
                                           date_from=None, date_to=None, reducer='median', orient='df'):
@@ -156,8 +149,7 @@ def get_time_series_from_image_collection(platform, sensor, product, index_name,
 
     log.debug(f'Time Series: {time_series}')
     return time_series
-
-
+    
 def upload_shapefile_to_gee(user, shp_file):
     """
     Upload a shapefile to Google Earth Engine as an asset.
@@ -185,16 +177,15 @@ def upload_shapefile_to_gee(user, shp_file):
         features.append(ee.Feature(geojson_feature))
 
     feature_collection = ee.FeatureCollection(features)
-
     # Get unique folder for each user to story boundary asset
     user_boundary_asset_path = get_user_boundary_path(user)
-
+    
     # Overwrite an existing asset with this name by deleting it first
     try:
         ee.batch.data.deleteAsset(user_boundary_asset_path)
     except EEException as e:
         # Nothing to delete, so pass
-        if 'Asset not found' not in str(e):
+        if 'Asset not found' not in str(e) and 'does not exist' not in str(e):
             log.exception('Encountered an unhandled EEException.')
             raise e
 
@@ -206,7 +197,6 @@ def upload_shapefile_to_gee(user, shp_file):
     )
 
     task.start()
-
 
 def get_asset_dir_for_user(user):
     """
@@ -250,7 +240,6 @@ def get_asset_dir_for_user(user):
 
     return user_root_dir
 
-
 def get_user_boundary_path(user):
     """
     Get a unique path for the user boundary asset.
@@ -264,7 +253,6 @@ def get_user_boundary_path(user):
     user_asset_dir = get_asset_dir_for_user(user)
     user_boundary_asset_path = os.path.join(user_asset_dir, 'boundary')
     return user_boundary_asset_path
-
 
 def get_boundary_fc_for_user(user):
     """
@@ -287,7 +275,6 @@ def get_boundary_fc_for_user(user):
         pass
 
     return None
-
 
 def get_boundary_fc_props_for_user(user):
     """

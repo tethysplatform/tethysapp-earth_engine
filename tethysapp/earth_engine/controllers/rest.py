@@ -1,14 +1,15 @@
-import datetime as dt
 import logging
-import geojson
-from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseServerError
+from django.http import JsonResponse, HttpResponseBadRequest
+from tethys_sdk.routing import controller
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes
-from simplejson import JSONDecodeError
-from tethys_sdk.routing import controller
-from ..helpers import compute_dates_for_product
-from ..gee.methods import get_time_series_from_image_collection
 from ..gee.products import EE_PRODUCTS
+import datetime as dt
+from ..helpers import compute_dates_for_product
+import geojson
+from simplejson import JSONDecodeError
+from django.http import HttpResponseServerError
+from ..gee.methods import get_time_series_from_image_collection
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
 
@@ -145,6 +146,8 @@ def get_time_series(request):
             f'The "scale" parameter must be a valid number, but "{scale_str}" was given.'
         )
 
+   
+
     # geometry
     bad_geometry_msg = 'The "geometry" parameter is required and must be a valid geojson string.'
     if not geometry_str:
@@ -192,3 +195,4 @@ def get_time_series(request):
     }
 
     return JsonResponse(response_data)
+

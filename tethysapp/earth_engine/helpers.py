@@ -1,17 +1,16 @@
-import datetime as dt
-import os
-import logging
-import glob
-import tempfile
-import zipfile
-import ee
 import pandas as pd
 from plotly import graph_objs as go
+import os
+import tempfile
+import zipfile
 import shapefile
+import glob
+import logging
+import ee
 from .gee.methods import upload_shapefile_to_gee
+import datetime as dt
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
-
 
 def generate_figure(figure_title, time_series):
     """
@@ -61,14 +60,12 @@ def generate_figure(figure_title, time_series):
 
     return figure
 
-
-def handle_shapefile_upload(request, user_workspace):
+def handle_shapefile_upload(request, user_media):
     """
     Uploads shapefile to Google Earth Engine as an Asset.
 
     Args:
         request (django.Request): the request object.
-        user_workspace (tethys_sdk.workspaces.Workspace): the User workspace object.
 
     Returns:
         str: Error string if errors occurred.
@@ -92,7 +89,7 @@ def handle_shapefile_upload(request, user_workspace):
         except zipfile.BadZipFile:
             # Return error message
             return 'You must provide a zip archive containing a shapefile.'
-
+        
         # Verify that it contains a shapefile
         try:
             # Find a shapefile in directory where we extracted the archive
@@ -105,12 +102,12 @@ def handle_shapefile_upload(request, user_workspace):
                 # Check type (only Polygon supported)
                 if shp_file.shapeType != shapefile.POLYGON:
                     return 'Only shapefiles containing Polygons are supported.'
+                
+                # Setup user media directory for storing shapefile
+                media_dir = prep_boundary_dir(user_media.path)
 
-                # Setup workspace directory for storing shapefile
-                workspace_dir = prep_boundary_dir(user_workspace.path)
-
-                # Write the shapefile to the workspace directory
-                write_boundary_shapefile(shp_file, workspace_dir)
+                # Write the shapefile to the media directory
+                write_boundary_shapefile(shp_file, media_dir)
 
                 # Upload shapefile as Asset in GEE
                 upload_shapefile_to_gee(request.user, shp_file)
@@ -122,8 +119,7 @@ def handle_shapefile_upload(request, user_workspace):
             msg = 'An unexpected error occurred while uploading the shapefile to Google Earth Engine.'
             log.exception(msg)
             return msg
-
-
+        
 def find_shapefile(directory):
     """
     Recursively find the path to the first file with an extension ".shp" in the given directory.
@@ -147,7 +143,6 @@ def find_shapefile(directory):
                 break
 
     return shapefile_path
-
 
 def prep_boundary_dir(root_path):
     """
@@ -177,7 +172,6 @@ def prep_boundary_dir(root_path):
 
     return boundary_dir
 
-
 def write_boundary_shapefile(shp_file, directory):
     """
     Write the shapefile to the given directory. The shapefile will be called "boundary.shp".
@@ -203,7 +197,6 @@ def write_boundary_shapefile(shp_file, directory):
             out_shp.shape(shaperec.shape)
 
     return shapefile_path
-
 
 def compute_dates_for_product(product_dict):
     """
