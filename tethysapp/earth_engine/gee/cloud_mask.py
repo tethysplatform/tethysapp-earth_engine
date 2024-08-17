@@ -10,7 +10,7 @@ def mask_l8_sr(image):
     cloudsBitMask = (1 << 5)
 
     # Get the pixel QA band.
-    qa = image.select('pixel_qa')
+    qa = image.select('QA_PIXEL')
 
     # Both flags should be set to zero, indicating clear conditions.
     mask = qa.bitwiseAnd(cloudShadowBitMask).eq(0).And(qa.bitwiseAnd(cloudsBitMask).eq(0))
@@ -21,7 +21,7 @@ def cloud_mask_l457(image):
     """
     Cloud Mask for Landsat 7 surface reflectance. Derived From: https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C01_T1_SR
     """
-    qa = image.select('pixel_qa')
+    qa = image.select('QA_PIXEL')
 
     # If the cloud bit (5) is set and the cloud confidence (7) is high
     # or the cloud shadow bit is set (3), then it's a bad pixel.

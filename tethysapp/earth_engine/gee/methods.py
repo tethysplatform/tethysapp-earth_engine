@@ -11,20 +11,14 @@ if gee_account.service_account:
     try:
         credentials = ee.ServiceAccountCredentials(gee_account.service_account, gee_account.private_key)
         ee.Initialize(credentials)
+        log.info('Successfully initialized GEE using service account.')
     except EEException as e:
-        print(str(e))
+        log.warning('Unable to initialize GEE using service account. If installing ignore this warning.')
 else:
     try:
         ee.Initialize()
     except EEException as e:
-        from oauth2client.service_account import ServiceAccountCredentials
-        credentials = ServiceAccountCredentials.from_p12_keyfile(
-            service_account_email='',
-            filename='',
-            private_key_password='notasecret',
-            scopes=ee.oauth.SCOPE + ' https://www.googleapis.com/auth/drive '
-        )
-        ee.Initialize(credentials)
+        log.warning('Unable to initialize GEE with local credentials. If installing ignore this warning.')
 
 
 def image_to_map_id(image_name, vis_params={}):
@@ -39,7 +33,6 @@ def image_to_map_id(image_name, vis_params={}):
 
     except EEException:
         log.exception('An error occurred while attempting to retrieve the map id.')
-
 
 def get_image_collection_asset(platform, sensor, product, date_from=None, date_to=None, reducer='median'):
     """

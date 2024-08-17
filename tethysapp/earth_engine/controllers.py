@@ -1,15 +1,13 @@
 import datetime as dt
 import logging
 from django.http import JsonResponse, HttpResponseNotAllowed
-from django.shortcuts import render
 from tethys_sdk.routing import controller
-from tethys_sdk.gizmos import SelectInput, DatePicker, Button
-from tethys_sdk.gizmos import MapView, MVView
-from .gee.methods import get_image_collection_asset
+from tethys_sdk.gizmos import SelectInput, DatePicker, Button, MapView, MVView
 from .gee.products import EE_PRODUCTS
+from .gee.methods import get_image_collection_asset
+from .app import App
 
 log = logging.getLogger(f'tethys.apps.{__name__}')
-
 
 @controller
 def home(request):
@@ -121,30 +119,29 @@ def home(request):
         style='outline-secondary',
         attributes={'id': 'load_map'}
     )
-
     map_view = MapView(
-        height='100%',
-        width='100%',
-        controls=[
-            'ZoomSlider', 'Rotate', 'FullScreen',
-            {'ZoomToExtent': {
-                'projection': 'EPSG:4326',
-                'extent': [29.25, -4.75, 46.25, 5.2]  #: Kenya
-            }}
-        ],
-        basemap=[
-            'CartoDB',
-            {'CartoDB': {'style': 'dark'}},
-            'OpenStreetMap',
-            'Stamen',
-            'ESRI'
-        ],
-        view=MVView(
-            projection='EPSG:4326',
-            center=[37.880859, 0.219726],
-            zoom=7,
-            maxZoom=18,
-            minZoom=2
+    height='100%',
+    width='100%',
+    controls=[
+        'ZoomSlider', 'Rotate', 'FullScreen',
+        {'ZoomToExtent': {
+            'projection': 'EPSG:4326',
+            'extent': [29.25, -4.75, 46.25, 5.2]  #: Kenya
+        }}
+    ],
+    basemap=[
+        'CartoDB',
+        {'CartoDB': {'style': 'dark'}},
+        'OpenStreetMap',
+        'Stamen',
+        'ESRI'
+    ],
+    view=MVView(
+        projection='EPSG:4326',
+        center=[37.880859, 0.219726],
+        zoom=7,
+        maxZoom=18,
+        minZoom=2
         )
     )
 
@@ -169,8 +166,8 @@ def home(request):
         'map_view': map_view
     }
 
-    return render(request, 'earth_engine/home.html', context)
 
+    return App.render(request, 'home.html', context)
 
 @controller
 def get_image_collection(request):
