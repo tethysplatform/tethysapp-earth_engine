@@ -214,14 +214,13 @@ def get_asset_dir_for_user(user):
         str: asset directory path for given user.
     """
     asset_roots = ee.batch.data.getAssetRoots()
+    
+    # Retreieve project ID from private key file
     if len(asset_roots) < 1:
-        # Find the Earth Engine credentials file path
         with open(private_key_path) as f:
             private_key_contents = json.load(f)
-            # Get the project ID from the credentials
             project_id = private_key_contents.get("project", None)
-            
-        
+                
         asset_path = f"projects/{project_id}/assets/tethys"
         # Create the asset directory
         ee.batch.data.createAsset({
