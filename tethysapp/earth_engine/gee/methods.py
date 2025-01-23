@@ -7,7 +7,7 @@ from . import cloud_mask as cm
 import geojson
 import pandas as pd
 import os
-import system
+import platform
 import json
 import math
 
