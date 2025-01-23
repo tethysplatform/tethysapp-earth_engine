@@ -203,22 +203,6 @@ def upload_shapefile_to_gee(user, shp_file):
 
     task.start()
 
-def get_earth_engine_credentials_path():
-    """Returns the full path to the Earth Engine credentials file.
-    
-    Compatible with both Linux/MacOS and Windows.
-    """
-    if platform.system() in ["Linux", "Darwin"]:
-        return os.path.expanduser("~/.config/earthengine/credentials")
-
-    elif platform.system() == "Windows":
-        user_profile = os.environ["USERPROFILE"]
-        return os.path.join(user_profile, ".config", "earthengine", "credentials")
-
-    else:
-        raise OSError("Unsupported operating system.")
-
-    
 def get_asset_dir_for_user(user):
     """
     Get a unique asset directory for given user.
@@ -232,16 +216,11 @@ def get_asset_dir_for_user(user):
     asset_roots = ee.batch.data.getAssetRoots()
     if len(asset_roots) < 1:
         # Find the Earth Engine credentials file path
-        credentials_path = get_earth_engine_credentials_path()
-        try:
-            with open(credentials_path) as f:
-                credentials = json.load(f)
-                # Get the project ID from the credentials
-                project_id = credentials.get("project", None)
-                if not project_id:
-                    raise ValueError('Project ID not found in credentials.')
-        except FileNotFoundError:
-            raise ValueError('Credentials file not found.')
+        with open(private_key_path) as f:
+            private_key_contents = json.load(f)
+            # Get the project ID from the credentials
+            project_id = private_key_contents.get("project", None)
+            
         
         asset_path = f"projects/{project_id}/assets/tethys"
         # Create the asset directory
