@@ -7,6 +7,7 @@ from . import cloud_mask as cm
 import geojson
 import pandas as pd
 import os
+import system
 import json
 import math
 
@@ -194,6 +195,21 @@ def upload_shapefile_to_gee(user, shp_file):
 
     task.start()
 
+def get_earth_engine_credentials_path():
+    """Returns the full path to the Earth Engine credentials file.
+    
+    Compatible with both Linux/MacOS and Windows.
+    """
+    if platform.system() in ["Linux", "Darwin"]:
+        return os.path.expanduser("~/.config/earthengine/credentials")
+
+    elif platform.system() == "Windows":
+        user_profile = os.environ["USERPROFILE"]
+        return os.path.join(user_profile, ".config", "earthengine", "credentials")
+
+    else:
+        raise OSError("Unsupported operating system.")
+
 def get_asset_dir_for_user(user):
     """
     Get a unique asset directory for given user.
@@ -205,14 +221,32 @@ def get_asset_dir_for_user(user):
         str: asset directory path for given user.
     """
     asset_roots = ee.batch.data.getAssetRoots()
-
     if len(asset_roots) < 1:
-        # Initialize the asset root directory if one doesn't exist already 
-        ee.batch.data.createAssetHome('users/earth_engine_app')
-    
+        # Find the Earth Engine credentials file path
+        credentials_path = get_earth_engine_credentials_path()
+        try:
+            with open(credentials_path) as f:
+                credentials = json.load(f)
+                # Get the project ID from the credentials
+                project_id = credentials.get("project", None)
+                if not project_id:
+                    raise ValueError('Project ID not found in credentials.')
+        except FileNotFoundError:
+            raise ValueError('Credentials file not found.')
+        
+        asset_path = f"projects/{project_id}/assets/tethys"
+        # Create the asset directory
+        ee.batch.data.createAsset({
+            'type': 'Folder',
+            'name': asset_path
+        })
+
+        asset_roots = ee.batch.data.getAssetRoots()
+
+    # Prepare asset directory paths
     asset_root_dir = asset_roots[0]['id']
-    earth_engine_root_dir = os.path.join(asset_root_dir, 'earth_engine_app')
-    user_root_dir = os.path.join(earth_engine_root_dir, user.username)
+    earth_engine_root_dir = asset_root_dir + "/earth_engine_app"
+    user_root_dir = earth_engine_root_dir + f"/{user.username}"
     
     # Create earth engine directory, will raise exception if it already exists
     try:
@@ -247,7 +281,7 @@ def get_user_boundary_path(user):
         str: the unique path for the user boundary asset.
     """
     user_asset_dir = get_asset_dir_for_user(user)
-    user_boundary_asset_path = os.path.join(user_asset_dir, 'boundary')
+    user_boundary_asset_path = user_asset_dir + '/boundary'
     return user_boundary_asset_path
 
 def get_boundary_fc_for_user(user):
