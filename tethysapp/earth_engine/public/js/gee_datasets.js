@@ -261,7 +261,8 @@ var GEE_DATASETS = (function() {
 
         m_gee_layer = new ol.layer.Tile({
             source: source,
-            opacity: 0.7
+            opacity: 0.7,
+            zIndex: 100
         });
     
         // Insert below the draw layer (so drawn polygons and points render on top of data layer).
