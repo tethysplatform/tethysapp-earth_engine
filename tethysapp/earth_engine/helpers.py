@@ -132,7 +132,7 @@ def find_shapefile(directory):
 
 def prep_boundary_dir(root_path):
     """
-    Setup the workspace directory that will store the uploaded boundary shapefile.
+    Setup the media directory that will store the uploaded boundary shapefile.
 
     Args:
         root_path (str): path to the root directory where the boundary directory will be located.
